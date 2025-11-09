@@ -2,6 +2,8 @@
 
 A professional RESTful API backend implemented in Go using the Gin framework. The API provides task management functionality, user authentication, and image downloading capabilities.
 
+![APIs.png](APIs.png)
+
 ## Table of Contents
 
 - [Features](#features)
