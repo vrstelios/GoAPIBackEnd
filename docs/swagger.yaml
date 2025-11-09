@@ -1,0 +1,331 @@
+basePath: /api
+definitions:
+  model.APIError:
+    properties:
+      code:
+        example: 400
+        type: integer
+      message:
+        example: Invalid request
+        type: string
+    type: object
+  model.DownloadImages:
+    properties:
+      error: {}
+      success:
+        type: boolean
+      url:
+        type: string
+    type: object
+  model.QueryPagingRequest:
+    properties:
+      page:
+        minimum: 0
+        type: integer
+      pageSize:
+        type: integer
+    type: object
+  model.QueryTasksRequest:
+    properties:
+      paging:
+        $ref: '#/definitions/model.QueryPagingRequest'
+      search:
+        type: string
+    type: object
+  model.QueryTasksResponse:
+    properties:
+      tasks:
+        items:
+          $ref: '#/definitions/model.Task'
+        type: array
+      totalPages:
+        type: integer
+      totalResults:
+        type: integer
+    type: object
+  model.Task:
+    properties:
+      done:
+        type: boolean
+      id:
+        type: string
+      title:
+        type: string
+    type: object
+  model.Urls:
+    properties:
+      urls:
+        items:
+          type: string
+        type: array
+    type: object
+  model.User:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+info:
+  contact:
+    name: DoctorVeRossi
+    url: https://github.com/vrstelios/....
+  description: A Tag service API in Go using Gin framework
+  title: EndPoints
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      description: Authenticates user and returns session cookies
+      parameters:
+      - description: User registration data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/model.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.APIError'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.APIError'
+      summary: Login user
+      tags:
+      - auth
+  /auth/logout:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Task'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.APIError'
+      summary: Logout user.
+      tags:
+      - auth
+  /auth/register:
+    post:
+      description: Creates a new user account with username and password
+      parameters:
+      - description: User registration data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/model.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.APIError'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.APIError'
+      summary: Register a new user.
+      tags:
+      - auth
+  /download/images:
+    post:
+      parameters:
+      - description: Urls
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.Urls'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.DownloadImages'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.APIError'
+      summary: Download images
+      tags:
+      - Task
+  /tasks:
+    get:
+      parameters:
+      - description: Task Id
+        in: query
+        name: id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Task'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.APIError'
+      summary: Query Task.
+      tags:
+      - Task
+    post:
+      description: Notes:<br>Leave the "relations" sub-entity empty.
+      parameters:
+      - description: Task
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.Task'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.APIError'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.APIError'
+      summary: Create Task.
+      tags:
+      - Task
+  /tasks/{id}:
+    delete:
+      parameters:
+      - description: Task
+        in: path
+        name: id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.APIError'
+      summary: Delete Task.
+      tags:
+      - Task
+    get:
+      parameters:
+      - description: Task Id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Task'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.APIError'
+      summary: Get Task.
+      tags:
+      - Task
+    put:
+      parameters:
+      - description: Task
+        in: path
+        name: id
+        type: string
+      - description: Task
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.Task'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.APIError'
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.APIError'
+      summary: Update Task.
+      tags:
+      - Task
+  /tasks/query:
+    post:
+      parameters:
+      - description: QueryTasksRequest
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.QueryTasksRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.QueryTasksResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.APIError'
+      summary: Query Task (server side filtering & paging)
+      tags:
+      - Task
+swagger: "2.0"
