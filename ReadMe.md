@@ -38,3 +38,5 @@ A professional RESTful API backend implemented in Go using the Gin framework. Th
 ```bash
 git clone <repository-url>
 cd GoAPIBackEnd
+go biuld main.go
+go run main.go
