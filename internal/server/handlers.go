@@ -1,9 +1,11 @@
-package core
+package server
 
 import (
-	"GoAPIBackEnd/model"
+	"GoAPIBackEnd/internal/model"
+	"GoAPIBackEnd/internal/utils"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"math"
 	"net/http"
@@ -17,6 +19,7 @@ import (
 // @Produce json
 // @Param request body model.Task true "Task"
 // @Success 200 {object} model.APIError
+// @Failure 208 {object} model.APIError
 // @Failure 400 {object} model.APIError
 // @Failure 500 {object} model.APIError
 // @Router /tasks [post]
@@ -44,7 +47,7 @@ func Post(ctx *gin.Context) {
 	}
 
 	model.LibTasks[task.Id] = &task
-	ctx.JSON(http.StatusCreated, model.LibTasks[task.Id])
+	ctx.JSON(http.StatusOK, model.LibTasks[task.Id])
 }
 
 // @Summary Get Task.
@@ -72,6 +75,7 @@ func Get(ctx *gin.Context) {
 // @Produce	json
 // @Param		id		query		string	false	"Task Id"
 // @Success	200		{array}		model.Task
+// @Failure 404     {object}    model.APIError
 // @Failure	500		{object}	model.APIError
 // @Router		/tasks [get]
 func Query(ctx *gin.Context) {
@@ -94,9 +98,9 @@ func Query(ctx *gin.Context) {
 // @Produce json
 // @Param id path string false "Task"
 // @Param request body model.Task true "Task"
-// @Success 204
+// @Success 200 {array}	 model.Task
 // @Failure 400 {object} model.APIError
-// @Failure 404
+// @Failure 404 {object} model.APIError
 // @Failure 500 {object} model.APIError
 // @Router /tasks/{id} [put]
 func Put(ctx *gin.Context) {
@@ -119,7 +123,6 @@ func Put(ctx *gin.Context) {
 		return
 	}
 
-	//t.Id = task.Id
 	t.Title = task.Title
 	t.Done = task.Done
 
@@ -130,8 +133,8 @@ func Put(ctx *gin.Context) {
 // @Tags Task
 // @Produce json
 // @Param id path string false "Task"
-// @Success 204
-// @Failure 404
+// @Success 200 {object} model.APIError
+// @Failure 404 {object} model.APIError
 // @Failure 500 {object} model.APIError
 // @Router /tasks/{id} [delete]
 func Del(ctx *gin.Context) {
@@ -153,6 +156,7 @@ func Del(ctx *gin.Context) {
 // @Param		request	body		model.Urls	true	"Urls"
 // @Success	200		{object}	model.DownloadImages
 // @Failure	400		{object}	model.APIError
+// @Failure	408     {object}	model.APIError
 // @Failure	500		{object}	model.APIError
 // @Router		/download/images [post]
 func DownloadUrls(ctx *gin.Context) {
@@ -245,6 +249,8 @@ func QueryTasksV2(ctx *gin.Context) {
 // @Param user body model.User true "User registration data"
 // @Success 200 {object} model.APIError
 // @Failure 400 {object} model.APIError
+// @Failure 406 {object} model.APIError
+// @Failure 409 {object} model.APIError
 // @Failure 500 {object} model.APIError
 // @Router /auth/register [post]
 func Register(ctx *gin.Context) {
@@ -265,12 +271,20 @@ func Register(ctx *gin.Context) {
 		return
 	}
 
-	hashedPassword, _ := hashPassword(user.Password)
-	model.Users[user.Username] = model.Login{
-		HashedPassword: hashedPassword,
+	hashedPassword, _ := utils.HashPassword(user.Password)
+	if user.Username == "admin" {
+		model.Users["admin"] = model.Login{
+			HashedPassword: hashedPassword,
+			Role:           "admin",
+		}
+	} else {
+		model.Users[user.Username] = model.Login{
+			HashedPassword: hashedPassword,
+			Role:           "user",
+		}
 	}
 
-	ctx.JSON(http.StatusTemporaryRedirect, "User registered successfully!")
+	ctx.JSON(http.StatusOK, "User registered successfully!")
 }
 
 // @Summary Login user
@@ -280,76 +294,47 @@ func Register(ctx *gin.Context) {
 // @Param user body model.User true "User registration data"
 // @Success 200 {object} model.APIError
 // @Failure 400 {object} model.APIError
+// @Failure 401 {object} model.APIError
 // @Failure 500 {object} model.APIError
 // @Router /auth/login [post]
 func Login(ctx *gin.Context) {
 	userPayload := model.User{}
-	err := ctx.ShouldBindJSON(&userPayload)
-	if err != nil {
+	if err := ctx.ShouldBindJSON(&userPayload); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 		return
 	}
 
 	user, ok := model.Users[userPayload.Username]
-	if !ok || !checkPasswordHash(userPayload.Password, user.HashedPassword) {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid username or password"})
+	if !ok || !utils.CheckPasswordHash(userPayload.Password, user.HashedPassword) {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password"})
 		return
 	}
 
-	sessionToken := generateToken(32)
-	csrToken := generateToken(32)
-
-	// Set session cookie
-	ctx.SetCookie("session_token", sessionToken, 3600, "/", "", false, true)
-
-	// Set CSRF token in a cookie
-	ctx.SetCookie("csr_token", csrToken, 3600, "/", "", false, false)
-
-	// Store tokens in the database
-	user.SessionToken = sessionToken
-	user.CSRFToken = csrToken
-	model.Users[userPayload.Username] = user
-
-	ctx.JSON(http.StatusTemporaryRedirect, "Login successfully!")
-}
-
-func Protected(ctx *gin.Context) {
-	if err := Authorize(ctx); err != nil {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-		return
-	}
-
-	username := ctx.GetString("username")
-	ctx.JSON(http.StatusOK, gin.H{
-		"message": "CSRF validation successful! Welcome, " + username,
+	// Created JWT
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"username": userPayload.Username,
+		"role":     user.Role,
+		"exp":      time.Now().Add(time.Hour * 2).Unix(),
 	})
 
+	tokenString, err := token.SignedString(JwtSecret)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"token": tokenString,
+	})
 }
 
 // @Summary	Logout user.
 // @Tags		auth
 // @Produce	json
-// @Success	200		{array}		model.Task
+// @Success	200		{array}		model.APIError
 // @Failure	500		{object}	model.APIError
 // @Router		/auth/logout [get]
 func Logout(ctx *gin.Context) {
-	if err := Authorize(ctx); err != nil {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-		return
-	}
-
-	username := ctx.GetString("username")
-
-	// Clear cookie
-	ctx.SetCookie("session_token", "", -1, "/", "", false, true)
-	ctx.SetCookie("csr_token", "", -1, "/", "", false, false)
-
-	// Clear the tokens from the database
-	user := model.Users[username]
-	user.SessionToken = ""
-	user.CSRFToken = ""
-	model.Users[username] = user
-
 	ctx.JSON(http.StatusOK, gin.H{"message": "Logout successfully!"})
 }
 

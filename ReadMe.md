@@ -1,42 +1,111 @@
 # GoAPIBackEnd
 
-A professional RESTful API backend implemented in Go using the Gin framework. The API provides task management functionality, user authentication, and image downloading capabilities.
+A RESTful API service built with Go and Gin framework, featuring JWT authentication, GraphQL support, and Swagger documentation.
 
 ![APIs.png](APIs.png)
 
-## Table of Contents
+## Project Structure
 
-- [Features](#features)
-- [Technologies](#technologies)
-- [Installation](#installation)
-- [Usage](#usage)
-- [API Endpoints](#api-endpoints)
-- [Authentication](#authentication)
-- [Project Structure](#project-structure)
-- [Development](#development)
+```
+.
+├── cmd/
+│   └── api/
+│       └── main.go          # Application entry point
+├── internal/
+│   ├── server/
+│   │   ├── server.go        # Server initialization
+│   │   ├── routes.go        # Route definitions
+│   │   ├── handlers.go      # HTTP handlers
+│   │   ├── middleware.go    # JWT and role-based middleware
+│   │   └── routes_test.go   # Route tests
+│   ├── model/
+│   │   └── model.go         # Data models
+│   ├── graphql/
+│   │   └── schema.go        # GraphQL schema definitions
+│   └── utils/
+│       └── utils.go         # Utility functions
+├── docs/                    # Swagger documentation
+├── air.toml                 # Air live reload configuration
+├── Makefile                 # Build and run commands
+├── go.mod                   # Go module file
+└── README.md               # This file
+```
 
 ## Features
 
-- **Security**: Session-based authentication with CSRF protection
-- **Task Management**: Full CRUD API for tasks
-- **Advanced Search**: Filtering and pagination capabilities
-- **Image Downloading**: Concurrent download of multiple URLs
-- **API Documentation**: Integrated Swagger UI
-- **High Performance**: Goroutines for concurrent operations
+- RESTful API with Gin framework
+- JWT-based authentication
+- Role-based access control (admin/user)
+- GraphQL endpoint with GraphiQL interface
+- Swagger/OpenAPI documentation
+- Task management CRUD operations
+- Image download functionality
+- Server-side filtering and pagination
 
-## Technologies
+## Prerequisites
 
-- **Go 1.24.7** - Programming language
-- **Gin Framework** - Web framework
-- **UUID** - Unique identifiers
-- **bcrypt** - Password hashing
-- **Swagger** - API documentation
+- Go 1.24 or higher
+- Make (optional, for using Makefile commands)
 
 ## Installation
 
-1. **Clone the repository**:
+1. Clone the repository:
 ```bash
 git clone <repository-url>
 cd GoAPIBackEnd
-go biuld main.go
-go run main.go
+```
+
+2. Install dependencies:
+```bash
+go mod download
+```
+
+## Usage
+
+### Run the application
+
+```bash
+# Using Make
+make run
+
+# Or directly
+go run cmd/api/main.go
+
+### Generate Swagger documentation
+
+```bash
+make swagger
+```
+
+Then access Swagger UI at: `http://localhost:8080/swagger/index.html`
+
+## API Endpoints
+
+### Authentication
+- `POST /api/auth/register` - Register a new user
+- `POST /api/auth/login` - Login and get JWT token
+- `GET /api/auth/logout` - Logout
+
+### Tasks (Protected - requires JWT)
+- `GET /api/tasks` - Get all tasks
+- `GET /api/tasks/:id` - Get task by ID
+- `POST /api/tasks` - Create task (admin only)
+- `PUT /api/tasks/:id` - Update task
+- `DELETE /api/tasks/:id` - Delete task
+- `POST /api/tasks/query` - Query tasks with filtering and pagination
+
+### GraphQL
+- `POST /api/graphql` - GraphQL endpoint (with GraphiQL interface)
+
+### Other
+- `POST /api/download/images` - Download images from URLs
+
+## Testing
+
+```bash
+# Run all tests
+make test
+
+# Run tests with coverage
+make TestRoutes
+```

@@ -3,7 +3,8 @@ package model
 type Login struct {
 	HashedPassword string
 	SessionToken   string
-	CSRFToken      string
+	//CSRFToken      string
+	Role string
 }
 
 var Users = map[string]Login{} // Key is the username
