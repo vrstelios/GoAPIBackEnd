@@ -51,7 +51,6 @@ func TestRoutes(t *testing.T) {
 		assert.Equal(t, 200, w.Code)
 		//fmt.Println("Login response:", w.Body.String())
 
-		var resp map[string]string
 		_ = json.Unmarshal(w.Body.Bytes(), &resp)
 		tokenString := resp["token"]
 		if tokenString == "" {
@@ -90,9 +89,7 @@ func TestRoutes(t *testing.T) {
 		req.Header.Set("Content-Type", "application/json")
 		r.ServeHTTP(w, req)
 		assert.Equal(t, 200, w.Code)
-		//fmt.Println("Login response:", w.Body.String())
 
-		//var resp map[string]string
 		_ = json.Unmarshal(w.Body.Bytes(), &resp)
 		token = resp["token"]
 		if token == "" {
@@ -164,6 +161,5 @@ func TestRoutes(t *testing.T) {
 		req.Header.Set("Content-Type", "application/json")
 		r.ServeHTTP(w, req)
 		assert.Equal(t, 200, w.Code)
-
 	})
 }
