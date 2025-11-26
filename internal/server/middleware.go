@@ -1,14 +1,16 @@
 package server
 
 import (
+	"GoAPIBackEnd/config"
 	"GoAPIBackEnd/internal/model"
 	"fmt"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
-	"net/http"
 )
 
-var JwtSecret = []byte("supersecretkey")
+var JwtSecret []byte
 
 func AuthJWTMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
@@ -61,4 +63,11 @@ func RoleMiddleware(allowedRoles ...string) gin.HandlerFunc {
 
 		ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "Forbidden"})
 	}
+}
+
+func init() {
+	if config.App == nil {
+		config.Load()
+	}
+	JwtSecret = []byte(config.App.JWT.Secret)
 }

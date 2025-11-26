@@ -1,6 +1,8 @@
 package server
 
 import (
+	"GoAPIBackEnd/config"
+	"GoAPIBackEnd/internal/apperrors"
 	"GoAPIBackEnd/internal/model"
 	"GoAPIBackEnd/internal/utils"
 	"fmt"
@@ -27,7 +29,7 @@ func Post(ctx *gin.Context) {
 	task := model.Task{}
 	err := ctx.ShouldBindJSON(&task)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusBadRequest, "INVALID_REQUEST", err))
 		return
 	}
 
@@ -41,13 +43,13 @@ func Post(ctx *gin.Context) {
 
 	for _, t := range model.LibTasks {
 		if t.Id == task.Id {
-			ctx.JSON(http.StatusAlreadyReported, gin.H{"error": "Same Id"})
+			apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusAlreadyReported, "DUPLICATE_ID", fmt.Errorf("Task with id %s already exists", task.Id)))
 			return
 		}
 	}
 
 	model.LibTasks[task.Id] = &task
-	ctx.JSON(http.StatusOK, model.LibTasks[task.Id])
+	apperrors.GetAPIError(ctx, model.LibTasks[task.Id], http.StatusOK, nil)
 }
 
 // @Summary Get Task.
@@ -63,11 +65,11 @@ func Get(ctx *gin.Context) {
 
 	task, ok := model.LibTasks[id]
 	if !ok {
-		ctx.JSON(http.StatusNotFound, nil)
+		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusNotFound, "TASK_NOT_FOUND", fmt.Errorf("Task with id %s not found", id)))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, task)
+	apperrors.GetAPIError(ctx, task, http.StatusOK, nil)
 }
 
 // @Summary	Query Task.
@@ -81,7 +83,7 @@ func Get(ctx *gin.Context) {
 func Query(ctx *gin.Context) {
 	libTasks := model.LibTasks
 	if len(libTasks) == 0 {
-		ctx.JSON(http.StatusNotFound, nil)
+		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusNotFound, "TASK_NOT_FOUND", fmt.Errorf("Task not found")))
 		return
 	}
 
@@ -90,7 +92,7 @@ func Query(ctx *gin.Context) {
 		tasks = append(tasks, *task)
 	}
 
-	ctx.JSON(http.StatusOK, tasks)
+	apperrors.GetAPIError(ctx, tasks, http.StatusOK, nil)
 }
 
 // @Summary Update Task.
@@ -107,26 +109,26 @@ func Put(ctx *gin.Context) {
 	task := model.Task{}
 	err := ctx.ShouldBindJSON(&task)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusBadRequest, "INVALID_REQUEST", err))
 		return
 	}
 
 	id := ctx.Param("id")
 	if task.Id != "" && task.Id != id {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Id in body must match URL"})
+		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusBadRequest, "ID_MISMATCH", fmt.Errorf("Id in body must match URL")))
 		return
 	}
 
 	t, ok := model.LibTasks[id]
 	if !ok {
-		ctx.JSON(http.StatusNotFound, nil)
+		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusNotFound, "TASK_NOT_FOUND", fmt.Errorf("Task not found")))
 		return
 	}
 
 	t.Title = task.Title
 	t.Done = task.Done
 
-	ctx.JSON(http.StatusOK, t)
+	apperrors.GetAPIError(ctx, t, http.StatusOK, nil)
 }
 
 // @Summary Delete Task.
@@ -142,12 +144,12 @@ func Del(ctx *gin.Context) {
 
 	_, ok := model.LibTasks[id]
 	if !ok {
-		ctx.JSON(http.StatusNotFound, gin.H{"error": "Task not found"})
+		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusNotFound, "TASK_NOT_FOUND", fmt.Errorf("Task not found")))
 		return
 	}
 
 	delete(model.LibTasks, id)
-	ctx.JSON(http.StatusOK, gin.H{"message": "Task deleted"})
+	apperrors.GetAPIError(ctx, nil, http.StatusNoContent, nil)
 }
 
 // @Summary	Download images
@@ -163,7 +165,7 @@ func DownloadUrls(ctx *gin.Context) {
 	urls := model.Urls{}
 	err := ctx.ShouldBindJSON(&urls)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusBadRequest, "INVALID_REQUEST", err))
 		return
 	}
 
@@ -189,7 +191,7 @@ func DownloadUrls(ctx *gin.Context) {
 
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"results": results})
+	apperrors.GetAPIError(ctx, gin.H{"results": results}, http.StatusOK, nil)
 }
 
 // @Summary	Query Task (server side filtering & paging)
@@ -204,7 +206,7 @@ func QueryTasksV2(ctx *gin.Context) {
 	queryRequest := model.QueryTasksRequest{}
 	err := ctx.ShouldBindJSON(&queryRequest)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, err)
+		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusBadRequest, "INVALID_REQUEST", err))
 		return
 	}
 
@@ -217,7 +219,7 @@ func QueryTasksV2(ctx *gin.Context) {
 
 	totalRows := len(filtered)
 	if totalRows == 0 {
-		ctx.JSON(http.StatusOK, model.QueryTasksResponse{TotalResults: totalRows, TotalPages: 0, Tasks: []model.Task{}})
+		apperrors.GetAPIError(ctx, model.QueryTasksResponse{TotalResults: totalRows, TotalPages: 0, Tasks: []model.Task{}}, http.StatusOK, nil)
 		return
 	}
 
@@ -235,11 +237,12 @@ func QueryTasksV2(ctx *gin.Context) {
 
 	pagedTasks := filtered[startPage:endPage]
 
-	ctx.JSON(http.StatusOK, model.QueryTasksResponse{
+	response := model.QueryTasksResponse{
 		TotalResults: totalRows,
 		TotalPages:   totalPages,
 		Tasks:        pagedTasks,
-	})
+	}
+	apperrors.GetAPIError(ctx, response, http.StatusOK, nil)
 }
 
 // @Summary Register a new user.
@@ -257,21 +260,26 @@ func Register(ctx *gin.Context) {
 	user := model.User{}
 	err := ctx.ShouldBindJSON(&user)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusBadRequest, "INVALID_REQUEST", err))
 		return
 	}
 
 	if len(user.Username) < 0 || len(user.Password) < 0 {
-		ctx.JSON(http.StatusNotAcceptable, gin.H{"error": "Invalid username/password"})
+		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusNotAcceptable, "INVALID_CREDENTIALS", fmt.Errorf("Invalid username/password")))
 		return
 	}
 
 	if _, ok := model.Users[user.Username]; ok {
-		ctx.JSON(http.StatusConflict, gin.H{"error": "User already exists"})
+		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusConflict, "USER_ALREADY_EXISTS", fmt.Errorf("User already exists")))
 		return
 	}
 
-	hashedPassword, _ := utils.HashPassword(user.Password)
+	hashedPassword, err := utils.HashPassword(user.Password)
+	if err != nil {
+		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusInternalServerError, "HASH_ERROR", err))
+		return
+	}
+
 	if user.Username == "admin" {
 		model.Users["admin"] = model.Login{
 			HashedPassword: hashedPassword,
@@ -284,7 +292,7 @@ func Register(ctx *gin.Context) {
 		}
 	}
 
-	ctx.JSON(http.StatusOK, "User registered successfully!")
+	apperrors.GetAPIError(ctx, gin.H{"message": "User registered successfully!"}, http.StatusOK, nil)
 }
 
 // @Summary Login user
@@ -300,13 +308,13 @@ func Register(ctx *gin.Context) {
 func Login(ctx *gin.Context) {
 	userPayload := model.User{}
 	if err := ctx.ShouldBindJSON(&userPayload); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusBadRequest, "INVALID_REQUEST", err))
 		return
 	}
 
 	user, ok := model.Users[userPayload.Username]
 	if !ok || !utils.CheckPasswordHash(userPayload.Password, user.HashedPassword) {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password"})
+		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusUnauthorized, "INVALID_CREDENTIALS", fmt.Errorf("Invalid username or password")))
 		return
 	}
 
@@ -314,18 +322,16 @@ func Login(ctx *gin.Context) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"username": userPayload.Username,
 		"role":     user.Role,
-		"exp":      time.Now().Add(time.Hour * 2).Unix(),
+		"exp":      time.Now().Add(time.Duration(config.App.JWT.ExpirationHours) * time.Hour).Unix(),
 	})
 
 	tokenString, err := token.SignedString(JwtSecret)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusInternalServerError, "TOKEN_GENERATION_ERROR", fmt.Errorf("Failed to generate token: %v", err)))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"token": tokenString,
-	})
+	apperrors.GetAPIError(ctx, gin.H{"token": tokenString}, http.StatusOK, nil)
 }
 
 // @Summary	Logout user.
@@ -335,7 +341,7 @@ func Login(ctx *gin.Context) {
 // @Failure	500		{object}	model.APIError
 // @Router		/auth/logout [get]
 func Logout(ctx *gin.Context) {
-	ctx.JSON(http.StatusOK, gin.H{"message": "Logout successfully!"})
+	apperrors.GetAPIError(ctx, gin.H{"message": "Logout successfully!"}, http.StatusOK, nil)
 }
 
 func downLoadImage(url string, ch chan<- model.DownloadImages) {
