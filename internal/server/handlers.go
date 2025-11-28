@@ -347,7 +347,7 @@ func Login(ctx *gin.Context) {
 
 	// Send it back
 	ctx.SetSameSite(http.SameSiteLaxMode)
-	ctx.SetCookie("Authorization", tokenString, 3600*24*30, "", "", false, true)
+	ctx.SetCookie("Authorization", tokenString, expHours, "", "", false, true)
 
 	apperrors.GetAPIError(ctx, gin.H{}, http.StatusOK, nil)
 }
