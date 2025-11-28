@@ -5,6 +5,7 @@ import (
 	"GoAPIBackEnd/internal/model"
 	"GoAPIBackEnd/internal/server"
 	"fmt"
+	"os"
 )
 
 // @title 		  EndPoints
@@ -14,7 +15,6 @@ import (
 // @contact.url   https://github.com/vrstelios/GoAPIBackEnd
 // @BasePath      /api
 func main() {
-	config.Load()
 	model.LibTasks = make(map[string]*model.Task)
 
 	srv := server.New()
@@ -26,5 +26,11 @@ func main() {
 	 \ \_____\  \ \_____\  -   \ \_\ \_\  \ \_\    \ \_\
 	  \/_____/   \/_____/       \/_/\/_/   \/_/     \/_/ `)
 
-	srv.Run(config.App.MasterAPIDomain)
+	srv.Run(os.Getenv("PORT"))
+}
+
+func init() {
+	config.LoadEnvVariables()
+	//database.ConnectToDB()
+	//database.SyncDatabase()
 }

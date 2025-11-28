@@ -4,23 +4,31 @@ import (
 	"GoAPIBackEnd/config"
 	"GoAPIBackEnd/internal/model"
 	"fmt"
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"net/http"
+	"os"
+	"strings"
 )
 
 var JwtSecret []byte
 
 func AuthJWTMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+		var tokenString string
+
 		authHeader := ctx.GetHeader("Authorization")
-		if authHeader == "" || len(authHeader) < 7 || authHeader[:7] != "Bearer " {
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Missing or invalid token"})
-			return
+		if strings.HasPrefix(authHeader, "Bearer ") {
+			tokenString = strings.TrimPrefix(authHeader, "Bearer ")
+		} else {
+			cookie, err := ctx.Cookie("Authorization")
+			if err != nil || cookie == "" {
+				ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Missing token"})
+				return
+			}
+			tokenString = cookie
 		}
 
-		tokenString := authHeader[7:]
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, fmt.Errorf("unexpected signing method")
@@ -66,8 +74,6 @@ func RoleMiddleware(allowedRoles ...string) gin.HandlerFunc {
 }
 
 func init() {
-	if config.App == nil {
-		config.Load()
-	}
-	JwtSecret = []byte(config.App.JWT.Secret)
+	config.LoadEnvVariables()
+	JwtSecret = []byte(os.Getenv("JWT_SECRET"))
 }

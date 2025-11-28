@@ -1,16 +1,17 @@
 package server
 
 import (
-	"GoAPIBackEnd/config"
 	"GoAPIBackEnd/internal/apperrors"
 	"GoAPIBackEnd/internal/model"
-	"GoAPIBackEnd/internal/utils"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 	"math"
 	"net/http"
+	"os"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -274,7 +275,7 @@ func Register(ctx *gin.Context) {
 		return
 	}
 
-	hashedPassword, err := utils.HashPassword(user.Password)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), 10)
 	if err != nil {
 		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusInternalServerError, "HASH_ERROR", err))
 		return
@@ -282,15 +283,22 @@ func Register(ctx *gin.Context) {
 
 	if user.Username == "admin" {
 		model.Users["admin"] = model.Login{
-			HashedPassword: hashedPassword,
+			HashedPassword: string(hashedPassword),
 			Role:           "admin",
 		}
 	} else {
 		model.Users[user.Username] = model.Login{
-			HashedPassword: hashedPassword,
+			HashedPassword: string(hashedPassword),
 			Role:           "user",
 		}
 	}
+
+	// TODO Create user in Database
+	/*user := model.User{}
+	result := database.DB.Create(&user)
+	if result.Error != nil {
+	   return result.Error
+	}*/
 
 	apperrors.GetAPIError(ctx, gin.H{"message": "User registered successfully!"}, http.StatusOK, nil)
 }
@@ -313,16 +321,22 @@ func Login(ctx *gin.Context) {
 	}
 
 	user, ok := model.Users[userPayload.Username]
-	if !ok || !utils.CheckPasswordHash(userPayload.Password, user.HashedPassword) {
+	if !ok {
+		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusUnauthorized, "INVALID_CREDENTIALS", fmt.Errorf("Invalid username or password")))
+		return
+	}
+	err := bcrypt.CompareHashAndPassword([]byte(user.HashedPassword), []byte(userPayload.Password))
+	if err != nil {
 		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusUnauthorized, "INVALID_CREDENTIALS", fmt.Errorf("Invalid username or password")))
 		return
 	}
 
-	// Created JWT
+	// Generate a jwt token
+	expHours, err := strconv.Atoi(os.Getenv("EXPIRATION_HOURS"))
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"username": userPayload.Username,
 		"role":     user.Role,
-		"exp":      time.Now().Add(time.Duration(config.App.JWT.ExpirationHours) * time.Hour).Unix(),
+		"exp":      time.Now().Add(time.Duration(expHours) * time.Hour).Unix(),
 	})
 
 	tokenString, err := token.SignedString(JwtSecret)
@@ -331,7 +345,11 @@ func Login(ctx *gin.Context) {
 		return
 	}
 
-	apperrors.GetAPIError(ctx, gin.H{"token": tokenString}, http.StatusOK, nil)
+	// Send it back
+	ctx.SetSameSite(http.SameSiteLaxMode)
+	ctx.SetCookie("Authorization", tokenString, 3600*24*30, "", "", false, true)
+
+	apperrors.GetAPIError(ctx, gin.H{}, http.StatusOK, nil)
 }
 
 // @Summary	Logout user.
@@ -341,6 +359,9 @@ func Login(ctx *gin.Context) {
 // @Failure	500		{object}	model.APIError
 // @Router		/auth/logout [get]
 func Logout(ctx *gin.Context) {
+	// Delete the JWT cookie
+	ctx.SetCookie("Authorization", "", -1, "", "", false, true)
+
 	apperrors.GetAPIError(ctx, gin.H{"message": "Logout successfully!"}, http.StatusOK, nil)
 }
 

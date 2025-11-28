@@ -5,9 +5,9 @@
         "title": "EndPoints",
         "contact": {
             "name": "DoctorVeRossi",
-            "url": "https://github.com/vrstelios/...."
+            "url": "https://github.com/vrstelios/GoAPIBackEnd"
         },
-        "version": "1.0"
+        "version": "1.2"
     },
     "basePath": "/api",
     "paths": {
@@ -45,6 +45,12 @@
                             "$ref": "#/definitions/model.APIError"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/model.APIError"
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -69,7 +75,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/model.Task"
+                                "$ref": "#/definitions/model.APIError"
                             }
                         }
                     },
@@ -116,6 +122,18 @@
                             "$ref": "#/definitions/model.APIError"
                         }
                     },
+                    "406": {
+                        "description": "Not Acceptable",
+                        "schema": {
+                            "$ref": "#/definitions/model.APIError"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/model.APIError"
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -158,6 +176,12 @@
                             "$ref": "#/definitions/model.APIError"
                         }
                     },
+                    "408": {
+                        "description": "Request Timeout",
+                        "schema": {
+                            "$ref": "#/definitions/model.APIError"
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -194,6 +218,12 @@
                             }
                         }
                     },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/model.APIError"
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -225,6 +255,12 @@
                 "responses": {
                     "200": {
                         "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.APIError"
+                        }
+                    },
+                    "208": {
+                        "description": "Already Reported",
                         "schema": {
                             "$ref": "#/definitions/model.APIError"
                         }
@@ -351,8 +387,14 @@
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": "No Content"
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Task"
+                            }
+                        }
                     },
                     "400": {
                         "description": "Bad Request",
@@ -361,7 +403,10 @@
                         }
                     },
                     "404": {
-                        "description": "Not Found"
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/model.APIError"
+                        }
                     },
                     "500": {
                         "description": "Internal Server Error",
@@ -388,11 +433,17 @@
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": "No Content"
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.APIError"
+                        }
                     },
                     "404": {
-                        "description": "Not Found"
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/model.APIError"
+                        }
                     },
                     "500": {
                         "description": "Internal Server Error",

@@ -1,7 +1,0 @@
-{
-  "MasterAPIDomain":"localhost:8080",
-  "jwt": {
-    "expiration_hours": 2,
-    "secret": ""
-  }
-}

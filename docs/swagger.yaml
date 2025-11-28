@@ -69,10 +69,10 @@ definitions:
 info:
   contact:
     name: DoctorVeRossi
-    url: https://github.com/vrstelios/....
+    url: https://github.com/vrstelios/GoAPIBackEnd
   description: A Tag service API in Go using Gin framework
   title: EndPoints
-  version: "1.0"
+  version: "1.2"
 paths:
   /auth/login:
     post:
@@ -95,6 +95,10 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/model.APIError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.APIError'
         "500":
           description: Internal Server Error
           schema:
@@ -111,7 +115,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/model.Task'
+              $ref: '#/definitions/model.APIError'
             type: array
         "500":
           description: Internal Server Error
@@ -141,6 +145,14 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/model.APIError'
+        "406":
+          description: Not Acceptable
+          schema:
+            $ref: '#/definitions/model.APIError'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/model.APIError'
         "500":
           description: Internal Server Error
           schema:
@@ -168,6 +180,10 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/model.APIError'
+        "408":
+          description: Request Timeout
+          schema:
+            $ref: '#/definitions/model.APIError'
         "500":
           description: Internal Server Error
           schema:
@@ -191,6 +207,10 @@ paths:
             items:
               $ref: '#/definitions/model.Task'
             type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.APIError'
         "500":
           description: Internal Server Error
           schema:
@@ -214,6 +234,10 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.APIError'
+        "208":
+          description: Already Reported
+          schema:
+            $ref: '#/definitions/model.APIError'
         "400":
           description: Bad Request
           schema:
@@ -235,10 +259,14 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: No Content
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.APIError'
         "404":
           description: Not Found
+          schema:
+            $ref: '#/definitions/model.APIError'
         "500":
           description: Internal Server Error
           schema:
@@ -286,14 +314,20 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: No Content
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Task'
+            type: array
         "400":
           description: Bad Request
           schema:
             $ref: '#/definitions/model.APIError'
         "404":
           description: Not Found
+          schema:
+            $ref: '#/definitions/model.APIError'
         "500":
           description: Internal Server Error
           schema:
