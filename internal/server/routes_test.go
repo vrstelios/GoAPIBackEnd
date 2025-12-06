@@ -1,7 +1,6 @@
 package server
 
 import (
-	"GoAPIBackEnd/internal/model"
 	"bytes"
 	"github.com/gin-gonic/gin"
 	"github.com/goccy/go-json"
@@ -108,8 +107,8 @@ func TestRoutes(t *testing.T) {
 
 	t.Run("Valid server-side filtering and paging", func(t *testing.T) {
 		// Define Valid server-side filtering and paging, err is nil by default
-		if model.LibTasks == nil {
-			model.LibTasks = make(map[string]*model.Task)
+		if models.LibTasks == nil {
+			models.LibTasks = make(map[string]*models.Task)
 		}
 
 		var userTest testUserCase
@@ -151,8 +150,8 @@ func TestRoutes(t *testing.T) {
 		var response testTaskCase
 		json.Unmarshal(w.Body.Bytes(), &response)
 
-		query := model.QueryTasksRequest{
-			Paging: model.QueryPagingRequest{PageSize: 2, Page: 1},
+		query := models.QueryTasksRequest{
+			Paging: models.QueryPagingRequest{PageSize: 2, Page: 1},
 			Search: response.Title,
 		}
 		jsonQuery, _ := json.Marshal(query)

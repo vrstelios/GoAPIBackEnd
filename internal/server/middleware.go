@@ -2,7 +2,7 @@ package server
 
 import (
 	"GoAPIBackEnd/config"
-	"GoAPIBackEnd/internal/model"
+	"GoAPIBackEnd/internal/models"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
@@ -56,7 +56,7 @@ func AuthJWTMiddleware() gin.HandlerFunc {
 func RoleMiddleware(allowedRoles ...string) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		username := ctx.GetString("username")
-		user, ok := model.Users[username]
+		user, ok := models.Users[username]
 		if !ok {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 			return

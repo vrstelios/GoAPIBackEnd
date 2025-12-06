@@ -1,7 +1,7 @@
 package graphql
 
 import (
-	"GoAPIBackEnd/internal/model"
+	"GoAPIBackEnd/internal/models"
 	"github.com/graphql-go/graphql"
 	"strings"
 )
@@ -28,8 +28,8 @@ var RootQuery = graphql.NewObject(graphql.ObjectConfig{
 		"tasks": &graphql.Field{
 			Type: graphql.NewList(TaskType),
 			Resolve: func(params graphql.ResolveParams) (interface{}, error) {
-				var tasks []model.Task
-				for _, t := range model.LibTasks {
+				var tasks []models.Task
+				for _, t := range models.LibTasks {
 					tasks = append(tasks, *t)
 				}
 				return tasks, nil
@@ -57,8 +57,8 @@ var RootQuery = graphql.NewObject(graphql.ObjectConfig{
 				limit, limitProvided := params.Args["limit"].(int)
 				offset, offsetProvided := params.Args["offset"].(int)
 
-				var filtered []model.Task
-				for _, t := range model.LibTasks {
+				var filtered []models.Task
+				for _, t := range models.LibTasks {
 					if titleContains != "" && !strings.Contains(strings.ToLower(t.Title), strings.ToLower(titleContains)) {
 						continue
 					}
@@ -70,7 +70,7 @@ var RootQuery = graphql.NewObject(graphql.ObjectConfig{
 
 				if offsetProvided {
 					if offset > len(filtered) {
-						filtered = []model.Task{}
+						filtered = []models.Task{}
 					} else {
 						filtered = filtered[offset:]
 					}

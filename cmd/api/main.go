@@ -2,20 +2,21 @@ package main
 
 import (
 	"GoAPIBackEnd/config"
-	"GoAPIBackEnd/internal/model"
+	"GoAPIBackEnd/internal/database"
+	"GoAPIBackEnd/internal/models"
 	"GoAPIBackEnd/internal/server"
 	"fmt"
 	"os"
 )
 
 // @title 		  EndPoints
-// @version		  1.2
+// @version		  1.3
 // @description   A Tag service API in Go using Gin framework
 // @contact.name  DoctorVeRossi
 // @contact.url   https://github.com/vrstelios/GoAPIBackEnd
 // @BasePath      /api
 func main() {
-	model.LibTasks = make(map[string]*model.Task)
+	models.LibTasks = make(map[string]*models.Task)
 
 	srv := server.New()
 
@@ -31,6 +32,6 @@ func main() {
 
 func init() {
 	config.LoadEnvVariables()
-	//database.ConnectToDB()
-	//database.SyncDatabase()
+	database.ConnectToDB()
+	database.SyncDatabase()
 }

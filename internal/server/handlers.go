@@ -2,7 +2,7 @@ package server
 
 import (
 	"GoAPIBackEnd/internal/apperrors"
-	"GoAPIBackEnd/internal/model"
+	"GoAPIBackEnd/internal/models"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
@@ -27,7 +27,7 @@ import (
 // @Failure 500 {object} model.APIError
 // @Router /tasks [post]
 func Post(ctx *gin.Context) {
-	task := model.Task{}
+	task := models.Task{}
 	err := ctx.ShouldBindJSON(&task)
 	if err != nil {
 		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusBadRequest, "INVALID_REQUEST", err))
@@ -42,15 +42,15 @@ func Post(ctx *gin.Context) {
 		task.Id = uid.String()
 	}
 
-	for _, t := range model.LibTasks {
+	for _, t := range models.LibTasks {
 		if t.Id == task.Id {
 			apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusAlreadyReported, "DUPLICATE_ID", fmt.Errorf("Task with id %s already exists", task.Id)))
 			return
 		}
 	}
 
-	model.LibTasks[task.Id] = &task
-	apperrors.GetAPIError(ctx, model.LibTasks[task.Id], http.StatusOK, nil)
+	models.LibTasks[task.Id] = &task
+	apperrors.GetAPIError(ctx, models.LibTasks[task.Id], http.StatusOK, nil)
 }
 
 // @Summary Get Task.
@@ -64,7 +64,7 @@ func Post(ctx *gin.Context) {
 func Get(ctx *gin.Context) {
 	id := ctx.Param("id")
 
-	task, ok := model.LibTasks[id]
+	task, ok := models.LibTasks[id]
 	if !ok {
 		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusNotFound, "TASK_NOT_FOUND", fmt.Errorf("Task with id %s not found", id)))
 		return
@@ -82,13 +82,13 @@ func Get(ctx *gin.Context) {
 // @Failure	500		{object}	model.APIError
 // @Router		/tasks [get]
 func Query(ctx *gin.Context) {
-	libTasks := model.LibTasks
+	libTasks := models.LibTasks
 	if len(libTasks) == 0 {
 		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusNotFound, "TASK_NOT_FOUND", fmt.Errorf("Task not found")))
 		return
 	}
 
-	var tasks []model.Task
+	var tasks []models.Task
 	for _, task := range libTasks {
 		tasks = append(tasks, *task)
 	}
@@ -107,7 +107,7 @@ func Query(ctx *gin.Context) {
 // @Failure 500 {object} model.APIError
 // @Router /tasks/{id} [put]
 func Put(ctx *gin.Context) {
-	task := model.Task{}
+	task := models.Task{}
 	err := ctx.ShouldBindJSON(&task)
 	if err != nil {
 		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusBadRequest, "INVALID_REQUEST", err))
@@ -120,7 +120,7 @@ func Put(ctx *gin.Context) {
 		return
 	}
 
-	t, ok := model.LibTasks[id]
+	t, ok := models.LibTasks[id]
 	if !ok {
 		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusNotFound, "TASK_NOT_FOUND", fmt.Errorf("Task not found")))
 		return
@@ -143,13 +143,13 @@ func Put(ctx *gin.Context) {
 func Del(ctx *gin.Context) {
 	id := ctx.Param("id")
 
-	_, ok := model.LibTasks[id]
+	_, ok := models.LibTasks[id]
 	if !ok {
 		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusNotFound, "TASK_NOT_FOUND", fmt.Errorf("Task not found")))
 		return
 	}
 
-	delete(model.LibTasks, id)
+	delete(models.LibTasks, id)
 	apperrors.GetAPIError(ctx, nil, http.StatusNoContent, nil)
 }
 
@@ -163,21 +163,21 @@ func Del(ctx *gin.Context) {
 // @Failure	500		{object}	model.APIError
 // @Router		/download/images [post]
 func DownloadUrls(ctx *gin.Context) {
-	urls := model.Urls{}
+	urls := models.Urls{}
 	err := ctx.ShouldBindJSON(&urls)
 	if err != nil {
 		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusBadRequest, "INVALID_REQUEST", err))
 		return
 	}
 
-	resultCh := make(chan model.DownloadImages, len(urls.Urls))
+	resultCh := make(chan models.DownloadImages, len(urls.Urls))
 	for _, url := range urls.Urls {
 		go downLoadImage(url, resultCh)
 	}
 
 	timeout := time.After(10 * time.Second)
 
-	results := make([]model.DownloadImages, 0, len(urls.Urls))
+	results := make([]models.DownloadImages, 0, len(urls.Urls))
 	for i := 0; i < len(urls.Urls); i++ {
 		select {
 		case result := <-resultCh:
@@ -204,15 +204,15 @@ func DownloadUrls(ctx *gin.Context) {
 // @Failure	500		{object}	model.APIError
 // @Router		/tasks/query [post]
 func QueryTasksV2(ctx *gin.Context) {
-	queryRequest := model.QueryTasksRequest{}
+	queryRequest := models.QueryTasksRequest{}
 	err := ctx.ShouldBindJSON(&queryRequest)
 	if err != nil {
 		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusBadRequest, "INVALID_REQUEST", err))
 		return
 	}
 
-	var filtered []model.Task
-	for _, task := range model.LibTasks {
+	var filtered []models.Task
+	for _, task := range models.LibTasks {
 		if strings.Contains(strings.ToLower(task.Title), strings.ToLower(queryRequest.Search)) {
 			filtered = append(filtered, *task)
 		}
@@ -220,7 +220,7 @@ func QueryTasksV2(ctx *gin.Context) {
 
 	totalRows := len(filtered)
 	if totalRows == 0 {
-		apperrors.GetAPIError(ctx, model.QueryTasksResponse{TotalResults: totalRows, TotalPages: 0, Tasks: []model.Task{}}, http.StatusOK, nil)
+		apperrors.GetAPIError(ctx, models.QueryTasksResponse{TotalResults: totalRows, TotalPages: 0, Tasks: []models.Task{}}, http.StatusOK, nil)
 		return
 	}
 
@@ -238,7 +238,7 @@ func QueryTasksV2(ctx *gin.Context) {
 
 	pagedTasks := filtered[startPage:endPage]
 
-	response := model.QueryTasksResponse{
+	response := models.QueryTasksResponse{
 		TotalResults: totalRows,
 		TotalPages:   totalPages,
 		Tasks:        pagedTasks,
@@ -258,7 +258,7 @@ func QueryTasksV2(ctx *gin.Context) {
 // @Failure 500 {object} model.APIError
 // @Router /auth/register [post]
 func Register(ctx *gin.Context) {
-	user := model.User{}
+	user := models.User{}
 	err := ctx.ShouldBindJSON(&user)
 	if err != nil {
 		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusBadRequest, "INVALID_REQUEST", err))
@@ -270,7 +270,7 @@ func Register(ctx *gin.Context) {
 		return
 	}
 
-	if _, ok := model.Users[user.Username]; ok {
+	if _, ok := models.Users[user.Username]; ok {
 		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusConflict, "USER_ALREADY_EXISTS", fmt.Errorf("User already exists")))
 		return
 	}
@@ -282,12 +282,12 @@ func Register(ctx *gin.Context) {
 	}
 
 	if user.Username == "admin" {
-		model.Users["admin"] = model.Login{
+		models.Users["admin"] = models.Login{
 			HashedPassword: string(hashedPassword),
 			Role:           "admin",
 		}
 	} else {
-		model.Users[user.Username] = model.Login{
+		models.Users[user.Username] = models.Login{
 			HashedPassword: string(hashedPassword),
 			Role:           "user",
 		}
@@ -314,13 +314,13 @@ func Register(ctx *gin.Context) {
 // @Failure 500 {object} model.APIError
 // @Router /auth/login [post]
 func Login(ctx *gin.Context) {
-	userPayload := model.User{}
+	userPayload := models.User{}
 	if err := ctx.ShouldBindJSON(&userPayload); err != nil {
 		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusBadRequest, "INVALID_REQUEST", err))
 		return
 	}
 
-	user, ok := model.Users[userPayload.Username]
+	user, ok := models.Users[userPayload.Username]
 	if !ok {
 		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusUnauthorized, "INVALID_CREDENTIALS", fmt.Errorf("Invalid username or password")))
 		return
@@ -365,12 +365,12 @@ func Logout(ctx *gin.Context) {
 	apperrors.GetAPIError(ctx, gin.H{"message": "Logout successfully!"}, http.StatusOK, nil)
 }
 
-func downLoadImage(url string, ch chan<- model.DownloadImages) {
+func downLoadImage(url string, ch chan<- models.DownloadImages) {
 	client := http.Client{Timeout: 5 * time.Second}
 
 	resp, err := client.Get(url)
 	if err != nil || resp.StatusCode != http.StatusOK {
-		ch <- model.DownloadImages{
+		ch <- models.DownloadImages{
 			URL:     url,
 			Success: false,
 			Error:   fmt.Errorf("HTTP error: %v", err),
@@ -379,7 +379,7 @@ func downLoadImage(url string, ch chan<- model.DownloadImages) {
 	}
 	defer resp.Body.Close()
 
-	ch <- model.DownloadImages{
+	ch <- models.DownloadImages{
 		URL:     url,
 		Success: true,
 		Error:   nil,
