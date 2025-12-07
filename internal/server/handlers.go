@@ -2,20 +2,22 @@ package server
 
 import (
 	"GoAPIBackEnd/internal/apperrors"
+	"GoAPIBackEnd/internal/database"
 	"GoAPIBackEnd/internal/models"
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
-	"math"
+	"gorm.io/gorm"
 	"net/http"
 	"os"
 	"strconv"
-	"strings"
 	"time"
 )
 
+/*
 // @Summary Create Task.
 // @Description Notes:<br>Leave the "relations" sub-entity empty.
 // @Tags Task
@@ -245,61 +247,65 @@ func QueryTasksV2(ctx *gin.Context) {
 	}
 	apperrors.GetAPIError(ctx, response, http.StatusOK, nil)
 }
+*/
 
 // @Summary Register a new user.
 // @Description Creates a new user account with username and password
 // @Tags auth
 // @Produce json
-// @Param user body model.User true "User registration data"
+// @Param user body model.Users true "User registration data"
 // @Success 200 {object} model.APIError
 // @Failure 400 {object} model.APIError
 // @Failure 406 {object} model.APIError
 // @Failure 409 {object} model.APIError
 // @Failure 500 {object} model.APIError
 // @Router /auth/register [post]
-func Register(ctx *gin.Context) {
-	user := models.User{}
-	err := ctx.ShouldBindJSON(&user)
+func Signup(ctx *gin.Context) {
+	userBody := models.Users{}
+	err := ctx.ShouldBindJSON(&userBody)
 	if err != nil {
 		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusBadRequest, "INVALID_REQUEST", err))
 		return
 	}
 
-	if len(user.Username) < 0 || len(user.Password) < 0 {
+	if len(userBody.Role) == 0 {
+		userBody.Role = "athlete"
+	}
+
+	if len(userBody.Name) == 0 && len(userBody.Email) == 0 {
+		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusNotAcceptable, "INVALID_CREDENTIALS", fmt.Errorf("Invalid username/password")))
+		return
+	}
+	if len(userBody.Password) < 0 && len(userBody.Password) > 8 {
 		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusNotAcceptable, "INVALID_CREDENTIALS", fmt.Errorf("Invalid username/password")))
 		return
 	}
 
-	if _, ok := models.Users[user.Username]; ok {
-		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusConflict, "USER_ALREADY_EXISTS", fmt.Errorf("User already exists")))
+	user, err := database.GetUser(userBody.Name)
+	if !errors.Is(err, gorm.ErrRecordNotFound) {
+		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusUnauthorized, "INVALID_CREDENTIALS", fmt.Errorf("Invalid username or password")))
 		return
 	}
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), 10)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(userBody.Password), 10)
 	if err != nil {
 		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusInternalServerError, "HASH_ERROR", err))
 		return
 	}
 
-	if user.Username == "admin" {
-		models.Users["admin"] = models.Login{
-			HashedPassword: string(hashedPassword),
-			Role:           "admin",
-		}
-	} else {
-		models.Users[user.Username] = models.Login{
-			HashedPassword: string(hashedPassword),
-			Role:           "user",
-		}
+	user = &models.Users{
+		Id:       uuid.New(),
+		Name:     userBody.Name,
+		Password: string(hashedPassword),
+		Email:    userBody.Email,
+		Role:     userBody.Role,
 	}
 
-	// TODO Create user in Database
-	/*user := model.User{}
-	result := database.DB.Create(&user)
-	if result.Error != nil {
-	   return result.Error
-	}*/
-
+	err = database.PostUser(*user)
+	if err != nil {
+		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusInternalServerError, "INVALID_REQUEST", err))
+		return
+	}
 	apperrors.GetAPIError(ctx, gin.H{"message": "User registered successfully!"}, http.StatusOK, nil)
 }
 
@@ -314,18 +320,23 @@ func Register(ctx *gin.Context) {
 // @Failure 500 {object} model.APIError
 // @Router /auth/login [post]
 func Login(ctx *gin.Context) {
-	userPayload := models.User{}
+	userPayload := models.Users{}
 	if err := ctx.ShouldBindJSON(&userPayload); err != nil {
 		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusBadRequest, "INVALID_REQUEST", err))
 		return
 	}
 
-	user, ok := models.Users[userPayload.Username]
-	if !ok {
+	user, err := database.GetUser(userPayload.Name)
+	if errors.Is(err, gorm.ErrRecordNotFound) {
 		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusUnauthorized, "INVALID_CREDENTIALS", fmt.Errorf("Invalid username or password")))
 		return
 	}
-	err := bcrypt.CompareHashAndPassword([]byte(user.HashedPassword), []byte(userPayload.Password))
+	if err != nil {
+		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusInternalServerError, "DB_ERROR", err))
+		return
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(userPayload.Password))
 	if err != nil {
 		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusUnauthorized, "INVALID_CREDENTIALS", fmt.Errorf("Invalid username or password")))
 		return
@@ -334,7 +345,7 @@ func Login(ctx *gin.Context) {
 	// Generate a jwt token
 	expHours, err := strconv.Atoi(os.Getenv("EXPIRATION_HOURS"))
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"username": userPayload.Username,
+		"username": userPayload.Name,
 		"role":     user.Role,
 		"exp":      time.Now().Add(time.Duration(expHours) * time.Hour).Unix(),
 	})
@@ -365,7 +376,7 @@ func Logout(ctx *gin.Context) {
 	apperrors.GetAPIError(ctx, gin.H{"message": "Logout successfully!"}, http.StatusOK, nil)
 }
 
-func downLoadImage(url string, ch chan<- models.DownloadImages) {
+/*func downLoadImage(url string, ch chan<- models.DownloadImages) {
 	client := http.Client{Timeout: 5 * time.Second}
 
 	resp, err := client.Get(url)
@@ -384,4 +395,4 @@ func downLoadImage(url string, ch chan<- models.DownloadImages) {
 		Success: true,
 		Error:   nil,
 	}
-}
+}*/

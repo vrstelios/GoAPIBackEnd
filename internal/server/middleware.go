@@ -2,6 +2,7 @@ package server
 
 import (
 	"GoAPIBackEnd/config"
+	"GoAPIBackEnd/internal/database"
 	"GoAPIBackEnd/internal/models"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -55,10 +56,10 @@ func AuthJWTMiddleware() gin.HandlerFunc {
 
 func RoleMiddleware(allowedRoles ...string) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		username := ctx.GetString("username")
-		user, ok := models.Users[username]
-		if !ok {
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		name := ctx.GetString("name")
+		var user models.Users
+		if err := database.DB.Where("name = ?", name).First(&user).Error; err != nil {
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
 			return
 		}
 

@@ -10,25 +10,38 @@ A RESTful API service built with Go and Gin framework, featuring JWT authenticat
 .
 ├── cmd/
 │   └── api/
-│       └── main.go          # Application entry point
+│       └── main.go           # Application entry point
+├── congig/
+│   └── config.go             # Load envaronment variables
+├── database/
+│   ├──schama.sql             # 
+│   └── schama-chnages.sql    # 
+├── docs/                     # Swagger documentation
+│   ├── docs.go                
+│   ├── swagger.json   
+│   └── swagger.yaml         
 ├── internal/
-│   ├── server/
-│   │   ├── server.go        # Server initialization
-│   │   ├── routes.go        # Route definitions
-│   │   ├── handlers.go      # HTTP handlers
-│   │   ├── middleware.go    # JWT and role-based middleware
-│   │   └── routes_test.go   # Route tests
-│   ├── model/
-│   │   └── model.go         # Data models
+│   ├── apperrors/
+│   │   ├──  apperror.go      # 
+│   ├── database/
+│   │   ├── database.go       # 
+│   │   ├── database_taest.go # 
+│   │   └── syncDataBase.go   # 
 │   ├── graphql/
-│   │   └── schema.go        # GraphQL schema definitions
-│   └── utils/
-│       └── utils.go         # Utility functions
-├── docs/                    # Swagger documentation
-├── air.toml                 # Air live reload configuration
-├── Makefile                 # Build and run commands
-├── go.mod                   # Go module file
-└── README.md               # This file
+│   │   └── schema.go         # GraphQL schema definitions
+│   ├── model/
+│   │   └── model.go          # Data models
+│   └── server/
+│       ├── server.go         # Server initialization
+│       ├── routes.go         # Route definitions
+│       ├── handlers.go       # HTTP handlers
+│       ├── middleware.go     # JWT and role-based middleware
+│       └── routes_test.go    # Route tests
+├── .env                      # Include all variables
+├── air.toml                  # Air live reload configuration
+├── Makefile                  # Build and run commands
+├── go.mod                    # Go module file
+└── README.md                 # This file
 ```
 
 ## Features

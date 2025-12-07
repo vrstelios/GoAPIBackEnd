@@ -2,9 +2,7 @@ package server
 
 import (
 	_ "GoAPIBackEnd/docs"
-	"GoAPIBackEnd/internal/graphql"
 	"github.com/gin-gonic/gin"
-	"github.com/graphql-go/handler"
 	"github.com/swaggo/files"
 	"github.com/swaggo/gin-swagger"
 )
@@ -15,22 +13,22 @@ func setupRoutes(router *gin.Engine) {
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// GraphQL handler
-	graphqlHandler := handler.New(&handler.Config{
+	/*graphqlHandler := handler.New(&handler.Config{
 		Schema:   &graphql.Schema,
 		Pretty:   true,
 		GraphiQL: true,
-	})
+	})*/
 
 	routerEndpoints := router.Group("/api")
 
-	routerEndpoints.POST("/auth/register", Register)
+	routerEndpoints.POST("/auth/signup", Signup)
 	routerEndpoints.POST("/auth/login", Login)
 	routerEndpoints.GET("/auth/logout", Logout)
 
 	routerEndpoints.Use(AuthJWTMiddleware())
 	{
 		// GraphQL endpoint
-		routerEndpoints.POST("/graphql", func(ctx *gin.Context) {
+		/*routerEndpoints.POST("/graphql", func(ctx *gin.Context) {
 			graphqlHandler.ServeHTTP(ctx.Writer, ctx.Request)
 		})
 
@@ -40,6 +38,6 @@ func setupRoutes(router *gin.Engine) {
 		routerEndpoints.PUT("/tasks/:id", Put)
 		routerEndpoints.DELETE("/tasks/:id", Del)
 		routerEndpoints.POST("/download/images", DownloadUrls)
-		routerEndpoints.POST("/tasks/query", QueryTasksV2)
+		routerEndpoints.POST("/tasks/query", QueryTasksV2)*/
 	}
 }

@@ -3,7 +3,6 @@ package main
 import (
 	"GoAPIBackEnd/config"
 	"GoAPIBackEnd/internal/database"
-	"GoAPIBackEnd/internal/models"
 	"GoAPIBackEnd/internal/server"
 	"fmt"
 	"os"
@@ -16,7 +15,7 @@ import (
 // @contact.url   https://github.com/vrstelios/GoAPIBackEnd
 // @BasePath      /api
 func main() {
-	models.LibTasks = make(map[string]*models.Task)
+	//models.LibTasks = make(map[string]*models.Task)
 
 	srv := server.New()
 

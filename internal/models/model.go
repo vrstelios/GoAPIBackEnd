@@ -7,7 +7,7 @@ type Login struct {
 	Role string
 }
 
-var Users = map[string]Login{} // Key is the username
+/*var Users = map[string]Login{} // Key is the username
 
 var LibTasks map[string]*Task
 
@@ -47,7 +47,7 @@ type QueryTasksResponse struct {
 type QueryPagingRequest struct {
 	PageSize int `json:"pageSize" binding:"gt=0"`
 	Page     int `json:"page" binding:"gte=0"`
-}
+}*/
 
 type APIError struct {
 	Code    int    `json:"code" example:"400"`
