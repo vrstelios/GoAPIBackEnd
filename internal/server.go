@@ -1,6 +1,7 @@
-package server
+package internal
 
 import (
+	"GoAPIBackEnd/internal/http"
 	"github.com/gin-gonic/gin"
 )
 
@@ -25,5 +26,5 @@ func (s *Server) Run(addr string) error {
 }
 
 func (s *Server) setupRoutes() {
-	setupRoutes(s.router)
+	http.SetupRoutes(s.router)
 }

@@ -1,13 +1,15 @@
-package server
+package http
 
 import (
 	_ "GoAPIBackEnd/docs"
+	"GoAPIBackEnd/internal/api"
+	"GoAPIBackEnd/internal/auth"
 	"github.com/gin-gonic/gin"
 	"github.com/swaggo/files"
 	"github.com/swaggo/gin-swagger"
 )
 
-func setupRoutes(router *gin.Engine) {
+func SetupRoutes(router *gin.Engine) {
 	// Swagger documentation
 	// http://localhost:8080/swagger/index.html
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
@@ -21,16 +23,21 @@ func setupRoutes(router *gin.Engine) {
 
 	routerEndpoints := router.Group("/api")
 
-	routerEndpoints.POST("/auth/signup", Signup)
-	routerEndpoints.POST("/auth/login", Login)
-	routerEndpoints.GET("/auth/logout", Logout)
+	routerEndpoints.POST("/auth/signup", api.Signup)
+	routerEndpoints.POST("/auth/login", api.Login)
+	routerEndpoints.GET("/auth/logout", api.Logout)
 
-	routerEndpoints.Use(AuthJWTMiddleware())
+	routerEndpoints.Use(auth.AuthJWTMiddleware())
 	{
 		// GraphQL endpoint
+		routerEndpoints.GET("/exercises")
+		routerEndpoints.GET("/exercises/:id")
+		routerEndpoints.POST("/exercises", auth.RoleMiddleware("admin"))
+
 		/*routerEndpoints.POST("/graphql", func(ctx *gin.Context) {
 			graphqlHandler.ServeHTTP(ctx.Writer, ctx.Request)
 		})
+
 
 		routerEndpoints.GET("/tasks", Query)
 		routerEndpoints.GET("/tasks/:id", Get)

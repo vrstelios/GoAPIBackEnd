@@ -2,8 +2,8 @@ package main
 
 import (
 	"GoAPIBackEnd/config"
+	"GoAPIBackEnd/internal"
 	"GoAPIBackEnd/internal/database"
-	"GoAPIBackEnd/internal/server"
 	"fmt"
 	"os"
 )
@@ -15,9 +15,7 @@ import (
 // @contact.url   https://github.com/vrstelios/GoAPIBackEnd
 // @BasePath      /api
 func main() {
-	//models.LibTasks = make(map[string]*models.Task)
-
-	srv := server.New()
+	srv := internal.New()
 
 	fmt.Println(`
 	 ______     ______         ______     ______   __
@@ -31,6 +29,6 @@ func main() {
 
 func init() {
 	config.LoadEnvVariables()
-	database.ConnectToDB()
-	database.SyncDatabase()
+	database.InitDatabase()
+	//database.SyncDatabase()
 }

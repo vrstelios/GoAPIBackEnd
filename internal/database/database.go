@@ -1,19 +1,17 @@
 package database
 
 import (
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
+	"context"
+	"github.com/jackc/pgx/v5"
 	"os"
 )
 
-var DB *gorm.DB
+var Conn *pgx.Conn
 
-func ConnectToDB() {
+func InitDatabase() {
 	var err error
-
-	dsn := os.Getenv("DB")
-	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	Conn, err = pgx.Connect(context.Background(), os.Getenv("DB"))
 	if err != nil {
-		panic("Failed to connect to db")
+		panic("Failed to connect to db: " + err.Error())
 	}
 }

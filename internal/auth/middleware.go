@@ -1,9 +1,8 @@
-package server
+package auth
 
 import (
 	"GoAPIBackEnd/config"
 	"GoAPIBackEnd/internal/database"
-	"GoAPIBackEnd/internal/models"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
@@ -56,15 +55,25 @@ func AuthJWTMiddleware() gin.HandlerFunc {
 
 func RoleMiddleware(allowedRoles ...string) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		name := ctx.GetString("name")
-		var user models.Users
-		if err := database.DB.Where("name = ?", name).First(&user).Error; err != nil {
+		username := ctx.GetString("username")
+		if len(username) == 0 {
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Missing username in context"})
+			return
+		}
+
+		user, err := database.GetUser(database.Conn, username)
+		if err != nil {
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
+			return
+		}
+
+		if len(user) == 0 {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
 			return
 		}
 
 		for _, role := range allowedRoles {
-			if user.Role == role {
+			if user[0].Role == role {
 				ctx.Next()
 				return
 			}

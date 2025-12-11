@@ -1,4 +1,4 @@
-package server
+package http
 
 import (
 	"bytes"
@@ -123,7 +123,7 @@ func TestRoutes(t *testing.T) {
 		r := gin.Default()
 		//r.POST("/api/auth/register", Register)
 		//r.POST("/api/auth/login", Login)
-		r.POST("/api/tasks", AuthJWTMiddleware(), RoleMiddleware("admin"), Post)
+		r.POST("/api/tasks", middleware_go.AuthJWTMiddleware(), middleware_go.RoleMiddleware("admin"), Post)
 		r.POST("/api/tasks/query", QueryTasksV2)
 
 		/*jsonUser, _ := json.Marshal(userTest)

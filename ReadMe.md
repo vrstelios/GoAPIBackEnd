@@ -10,38 +10,40 @@ A RESTful API service built with Go and Gin framework, featuring JWT authenticat
 .
 ├── cmd/
 │   └── api/
-│       └── main.go           # Application entry point
+│       └── main.go              # Application entry point
 ├── congig/
-│   └── config.go             # Load envaronment variables
+│   └── config.go                # Load envaronment variables
 ├── database/
-│   ├──schama.sql             # 
-│   └── schama-chnages.sql    # 
-├── docs/                     # Swagger documentation
+│   ├── schama.sql               # schame from database
+│   └── schama-changes.sql       # change the database
+├── docs/                        # Swagger documentation
 │   ├── docs.go                
 │   ├── swagger.json   
 │   └── swagger.yaml         
 ├── internal/
+│   ├── api/                     # HTTP handlers
+│   │   ├──  handler_Exercise.go  
+│   │   └──  handler_Users.go    
 │   ├── apperrors/
-│   │   ├──  apperror.go      # 
+│   │   ├──  apperror.go         # error handlering
+│   ├── auth/
+│   │   └──  middleware.go       # JWT and role-based middleware
 │   ├── database/
-│   │   ├── database.go       # 
-│   │   ├── database_taest.go # 
-│   │   └── syncDataBase.go   # 
+│   │   ├── database.go          # connection with database
+│   │   └── crud.go              # database queries
 │   ├── graphql/
-│   │   └── schema.go         # GraphQL schema definitions
+│   │   └── schema.go            # GraphQL schema definitions
+│   ├── http/
+│   │   ├── httpserver.go        # Route definitions
+│   │   └── httpserver_test.go   # Route tests
 │   ├── model/
-│   │   └── model.go          # Data models
-│   └── server/
-│       ├── server.go         # Server initialization
-│       ├── routes.go         # Route definitions
-│       ├── handlers.go       # HTTP handlers
-│       ├── middleware.go     # JWT and role-based middleware
-│       └── routes_test.go    # Route tests
-├── .env                      # Include all variables
-├── air.toml                  # Air live reload configuration
-├── Makefile                  # Build and run commands
-├── go.mod                    # Go module file
-└── README.md                 # This file
+│   │   └── model.go             # Data models
+│   └── server.go                # Server initialization
+├── .env                         # Include all variables
+├── air.toml                     # Air live reload configuration
+├── Makefile                     # Build and run commands
+├── go.mod                       # Go module file
+└── README.md                    # This file
 ```
 
 ## Features
