@@ -14,8 +14,8 @@ A RESTful API service built with Go and Gin framework, featuring JWT authenticat
 ├── congig/
 │   └── config.go                # Load envaronment variables
 ├── database/
-│   ├── schama.sql               # schame from database
-│   └── schama-changes.sql       # change the database
+│   ├── schema.sql               # Schema from database
+│   └── schema-changes.sql       # Change the database
 ├── docs/                        # Swagger documentation
 │   ├── docs.go                
 │   ├── swagger.json   
@@ -25,12 +25,12 @@ A RESTful API service built with Go and Gin framework, featuring JWT authenticat
 │   │   ├──  handler_Exercise.go  
 │   │   └──  handler_Users.go    
 │   ├── apperrors/
-│   │   ├──  apperror.go         # error handlering
+│   │   ├──  apperror.go         # Error handlering
 │   ├── auth/
 │   │   └──  middleware.go       # JWT and role-based middleware
 │   ├── database/
-│   │   ├── database.go          # connection with database
-│   │   └── crud.go              # database queries
+│   │   ├── database.go          # Connection with database
+│   │   └── crud.go              # Database queries
 │   ├── graphql/
 │   │   └── schema.go            # GraphQL schema definitions
 │   ├── http/
