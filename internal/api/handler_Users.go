@@ -18,8 +18,6 @@ import (
 	"time"
 )
 
-//var dbConn database.Conn
-
 // @Summary Register a new user.
 // @Description Creates a new user account with username and password
 // @Tags auth

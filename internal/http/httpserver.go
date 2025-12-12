@@ -10,8 +10,7 @@ import (
 )
 
 func SetupRoutes(router *gin.Engine) {
-	// Swagger documentation
-	// http://localhost:8080/swagger/index.html
+	// Swagger documentation http://localhost:8080/swagger/index.html
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// GraphQL handler
@@ -29,11 +28,12 @@ func SetupRoutes(router *gin.Engine) {
 
 	routerEndpoints.Use(auth.AuthJWTMiddleware())
 	{
-		// GraphQL endpoint
+		// Exercises endpoints
 		routerEndpoints.GET("/exercises")
 		routerEndpoints.GET("/exercises/:id")
-		routerEndpoints.POST("/exercises", auth.RoleMiddleware("admin"))
+		routerEndpoints.POST("/exercises", auth.RoleMiddleware("admin"), api.PostExercise)
 
+		// GraphQL endpoint
 		/*routerEndpoints.POST("/graphql", func(ctx *gin.Context) {
 			graphqlHandler.ServeHTTP(ctx.Writer, ctx.Request)
 		})
