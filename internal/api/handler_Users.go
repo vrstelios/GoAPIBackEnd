@@ -52,7 +52,7 @@ func Signup(ctx *gin.Context) {
 		return
 	}
 
-	user, err := database.GetUser(dbConn, userBody.Name)
+	user, err := database.GetUser(dbConn, "", userBody.Name)
 	if err != nil {
 		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusInternalServerError, "DB_ERROR", err))
 		return
@@ -69,7 +69,7 @@ func Signup(ctx *gin.Context) {
 	}
 
 	nUser := models.Users{
-		Id:       uuid.New(),
+		Id:       uuid.New().String(),
 		Name:     userBody.Name,
 		Password: string(hashedPassword),
 		Email:    userBody.Email,
@@ -103,7 +103,7 @@ func Login(ctx *gin.Context) {
 		return
 	}
 
-	user, err := database.GetUser(dbConn, userPayload.Name)
+	user, err := database.GetUser(dbConn, "", userPayload.Name)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusUnauthorized, "INVALID_CREDENTIALS", fmt.Errorf("Invalid username or password")))
 		return
@@ -135,7 +135,7 @@ func Login(ctx *gin.Context) {
 
 	// Send it back
 	ctx.SetSameSite(http.SameSiteLaxMode)
-	ctx.SetCookie("Authorization", tokenString, expHours, "", "", false, true)
+	ctx.SetCookie("Authorization", tokenString, expHours*3600, "/", "", false, true)
 
 	apperrors.GetAPIError(ctx, gin.H{}, http.StatusOK, nil)
 }
@@ -148,7 +148,7 @@ func Login(ctx *gin.Context) {
 // @Router		/auth/logout [get]
 func Logout(ctx *gin.Context) {
 	// Delete the JWT cookie
-	ctx.SetCookie("Authorization", "", -1, "", "", false, true)
+	ctx.SetCookie("Authorization", "", -1, "/", "", false, true)
 
 	apperrors.GetAPIError(ctx, gin.H{"message": "Logout successfully!"}, http.StatusOK, nil)
 }

@@ -29,9 +29,13 @@ func SetupRoutes(router *gin.Engine) {
 	routerEndpoints.Use(auth.AuthJWTMiddleware())
 	{
 		// Exercises endpoints
-		routerEndpoints.GET("/exercises")
-		routerEndpoints.GET("/exercises/:id")
+		routerEndpoints.GET("/exercises", api.QueryExercises)
+		routerEndpoints.GET("/exercises/:id", api.GetExercise)
 		routerEndpoints.POST("/exercises", auth.RoleMiddleware("admin"), api.PostExercise)
+
+		// Coach endpoints
+		routerEndpoints.GET("/coach/:name", auth.RoleMiddleware("admin"), api.GetCoach)
+		routerEndpoints.POST("/coach", auth.RoleMiddleware("admin"), api.PostCoach)
 
 		// GraphQL endpoint
 		/*routerEndpoints.POST("/graphql", func(ctx *gin.Context) {

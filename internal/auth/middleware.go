@@ -61,7 +61,7 @@ func RoleMiddleware(allowedRoles ...string) gin.HandlerFunc {
 			return
 		}
 
-		user, err := database.GetUser(database.Conn, username)
+		user, err := database.GetUser(database.Conn, "", username)
 		if err != nil {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
 			return

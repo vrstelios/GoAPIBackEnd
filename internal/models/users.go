@@ -22,11 +22,12 @@ type UsersRelations struct {
 type Coach struct {
 	Id        string          `json:"id"`
 	Name      string          `json:"name"`
+	UserId    string          `json:"userId"`
 	Relations *CoachRelations `json:"relationships,omitempty"`
 }
 
 type CoachRelations struct {
-	Users []*Users `json:"users"`
+	User *Users `json:"users"`
 }
 
 type Login struct {
