@@ -3,7 +3,7 @@ package api
 import (
 	"GoAPIBackEnd/internal/apperrors"
 	"GoAPIBackEnd/internal/database"
-	"GoAPIBackEnd/internal/models"
+	"GoAPIBackEnd/internal/type/models"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -13,11 +13,11 @@ import (
 // @Summary Create Exercise.
 // @Tags Exercise
 // @Produce json
-// @Param request body model.Exercises true "Exercise"
-// @Success 200 {object} model.APIError
-// @Failure 208 {object} model.APIError
-// @Failure 400 {object} model.APIError
-// @Failure 500 {object} model.APIError
+// @Param request body models.Exercises true "Exercise"
+// @Success 200 {object} models.APIError
+// @Failure 208 {object} models.APIError
+// @Failure 400 {object} models.APIError
+// @Failure 500 {object} models.APIError
 // @Router /exercises [post]
 func PostExercise(ctx *gin.Context) {
 	var dbConn = database.Conn
@@ -60,9 +60,9 @@ func PostExercise(ctx *gin.Context) {
 // @Tags Exercise
 // @Produce json
 // @Param id path string true "Exercise Id"
-// @Success 200 {object} model.Exercise
-// @Failure 404 {object} model.APIError
-// @Failure 500 {object} model.APIError
+// @Success 200 {object} models.Exercises
+// @Failure 404 {object} models.APIError
+// @Failure 500 {object} models.APIError
 // @Router /exercises/{id} [get]
 func GetExercise(ctx *gin.Context) {
 	var dbConn = database.Conn
@@ -84,9 +84,9 @@ func GetExercise(ctx *gin.Context) {
 // @Summary	Query Exercises.
 // @Tags		Exercise
 // @Produce	json
-// @Success	200		{array}		model.Exercise
-// @Failure 404     {object}    model.APIError
-// @Failure	500		{object}	model.APIError
+// @Success	200		{array}		models.Exercises
+// @Failure 404     {object}    models.APIError
+// @Failure	500		{object}	models.APIError
 // @Router		/exercises [get]
 func QueryExercises(ctx *gin.Context) {
 	var dbConn = database.Conn

@@ -1,6 +1,6 @@
 basePath: /api
 definitions:
-  model.APIError:
+  models.APIError:
     properties:
       code:
         example: 400
@@ -9,62 +9,80 @@ definitions:
         example: Invalid request
         type: string
     type: object
-  model.DownloadImages:
+  models.Coach:
     properties:
-      error: {}
-      success:
-        type: boolean
-      url:
-        type: string
-    type: object
-  model.QueryPagingRequest:
-    properties:
-      page:
-        minimum: 0
-        type: integer
-      pageSize:
-        type: integer
-    type: object
-  model.QueryTasksRequest:
-    properties:
-      paging:
-        $ref: '#/definitions/model.QueryPagingRequest'
-      search:
-        type: string
-    type: object
-  model.QueryTasksResponse:
-    properties:
-      tasks:
-        items:
-          $ref: '#/definitions/model.Task'
-        type: array
-      totalPages:
-        type: integer
-      totalResults:
-        type: integer
-    type: object
-  model.Task:
-    properties:
-      done:
-        type: boolean
       id:
         type: string
-      title:
+      name:
+        type: string
+      relationships:
+        $ref: '#/definitions/models.CoachRelations'
+      userId:
         type: string
     type: object
-  model.Urls:
+  models.CoachRelations:
     properties:
-      urls:
-        items:
-          type: string
-        type: array
+      users:
+        $ref: '#/definitions/models.Users'
     type: object
-  model.User:
+  models.Exercises:
     properties:
+      category:
+        type: string
+      createdAt:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+  models.Users:
+    properties:
+      coachId:
+        type: string
+      createdAt:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
       password:
         type: string
-      username:
+      relationships:
+        $ref: '#/definitions/models.UsersRelations'
+      role:
         type: string
+    type: object
+  models.UsersRelations:
+    properties:
+      coach:
+        $ref: '#/definitions/models.Coach'
+    type: object
+  models.Workouts:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      notes:
+        type: string
+      relationships:
+        $ref: '#/definitions/models.WorkoutsRelations'
+      scheduledAt:
+        type: string
+      userId:
+        type: string
+    type: object
+  models.WorkoutsRelations:
+    properties:
+      Users:
+        $ref: '#/definitions/models.Users'
     type: object
 info:
   contact:
@@ -72,8 +90,34 @@ info:
     url: https://github.com/vrstelios/GoAPIBackEnd
   description: A Tag service API in Go using Gin framework
   title: EndPoints
-  version: "1.2"
+  version: "1.3"
 paths:
+  /Coach/{name}:
+    get:
+      parameters:
+      - description: Coach Name
+        in: path
+        name: Name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Coach'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.APIError'
+      summary: Get Coach.
+      tags:
+      - Coach
   /auth/login:
     post:
       description: Authenticates user and returns session cookies
@@ -83,26 +127,26 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/model.User'
+          $ref: '#/definitions/models.Users'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.APIError'
+            $ref: '#/definitions/models.APIError'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/model.APIError'
+            $ref: '#/definitions/models.APIError'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/model.APIError'
+            $ref: '#/definitions/models.APIError'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/model.APIError'
+            $ref: '#/definitions/models.APIError'
       summary: Login user
       tags:
       - auth
@@ -115,12 +159,12 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/model.APIError'
+              $ref: '#/definitions/models.APIError'
             type: array
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/model.APIError'
+            $ref: '#/definitions/models.APIError'
       summary: Logout user.
       tags:
       - auth
@@ -133,184 +177,66 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/model.User'
+          $ref: '#/definitions/models.Users'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.APIError'
+            $ref: '#/definitions/models.APIError'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/model.APIError'
+            $ref: '#/definitions/models.APIError'
         "406":
           description: Not Acceptable
           schema:
-            $ref: '#/definitions/model.APIError'
+            $ref: '#/definitions/models.APIError'
         "409":
           description: Conflict
           schema:
-            $ref: '#/definitions/model.APIError'
+            $ref: '#/definitions/models.APIError'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/model.APIError'
+            $ref: '#/definitions/models.APIError'
       summary: Register a new user.
       tags:
       - auth
-  /download/images:
+  /coach:
     post:
       parameters:
-      - description: Urls
+      - description: Coach
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/model.Urls'
+          $ref: '#/definitions/models.Coach'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.DownloadImages'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/model.APIError'
-        "408":
-          description: Request Timeout
-          schema:
-            $ref: '#/definitions/model.APIError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/model.APIError'
-      summary: Download images
-      tags:
-      - Task
-  /tasks:
-    get:
-      parameters:
-      - description: Task Id
-        in: query
-        name: id
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/model.Task'
-            type: array
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/model.APIError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/model.APIError'
-      summary: Query Task.
-      tags:
-      - Task
-    post:
-      description: Notes:<br>Leave the "relations" sub-entity empty.
-      parameters:
-      - description: Task
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/model.Task'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/model.APIError'
+            $ref: '#/definitions/models.APIError'
         "208":
           description: Already Reported
           schema:
-            $ref: '#/definitions/model.APIError'
+            $ref: '#/definitions/models.APIError'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/model.APIError'
+            $ref: '#/definitions/models.APIError'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/model.APIError'
-      summary: Create Task.
+            $ref: '#/definitions/models.APIError'
+      summary: Create Coach.
       tags:
-      - Task
-  /tasks/{id}:
-    delete:
-      parameters:
-      - description: Task
-        in: path
-        name: id
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/model.APIError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/model.APIError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/model.APIError'
-      summary: Delete Task.
-      tags:
-      - Task
+      - Coach
+  /exercises:
     get:
-      parameters:
-      - description: Task Id
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/model.Task'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/model.APIError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/model.APIError'
-      summary: Get Task.
-      tags:
-      - Task
-    put:
-      parameters:
-      - description: Task
-        in: path
-        name: id
-        type: string
-      - description: Task
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/model.Task'
       produces:
       - application/json
       responses:
@@ -318,48 +244,187 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/model.Task'
+              $ref: '#/definitions/models.Exercises'
             type: array
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/model.APIError'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/model.APIError'
+            $ref: '#/definitions/models.APIError'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/model.APIError'
-      summary: Update Task.
+            $ref: '#/definitions/models.APIError'
+      summary: Query Exercises.
       tags:
-      - Task
-  /tasks/query:
+      - Exercise
     post:
       parameters:
-      - description: QueryTasksRequest
+      - description: Exercise
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/model.QueryTasksRequest'
+          $ref: '#/definitions/models.Exercises'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.QueryTasksResponse'
+            $ref: '#/definitions/models.APIError'
+        "208":
+          description: Already Reported
+          schema:
+            $ref: '#/definitions/models.APIError'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/model.APIError'
+            $ref: '#/definitions/models.APIError'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/model.APIError'
-      summary: Query Task (server side filtering & paging)
+            $ref: '#/definitions/models.APIError'
+      summary: Create Exercise.
       tags:
-      - Task
+      - Exercise
+  /exercises/{id}:
+    get:
+      parameters:
+      - description: Exercise Id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Exercises'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.APIError'
+      summary: Get Exercise.
+      tags:
+      - Exercise
+  /workouts:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Workouts'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.APIError'
+      summary: Query Workouts.
+      tags:
+      - Workouts
+    post:
+      parameters:
+      - description: Workout
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.Workouts'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.APIError'
+        "208":
+          description: Already Reported
+          schema:
+            $ref: '#/definitions/models.APIError'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.APIError'
+      summary: Create Workout.
+      tags:
+      - Workouts
+  /workouts/{id}:
+    get:
+      parameters:
+      - description: Workouts Id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Workouts'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.APIError'
+      summary: Get Workout.
+      tags:
+      - Workouts
+    put:
+      parameters:
+      - description: Workout
+        in: path
+        name: id
+        type: string
+      - description: Workouts
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.Workouts'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Workouts'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.APIError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.APIError'
+      summary: Update Workout.
+      tags:
+      - Workouts
 swagger: "2.0"

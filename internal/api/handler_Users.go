@@ -4,7 +4,7 @@ import (
 	"GoAPIBackEnd/internal/apperrors"
 	"GoAPIBackEnd/internal/auth"
 	"GoAPIBackEnd/internal/database"
-	"GoAPIBackEnd/internal/models"
+	"GoAPIBackEnd/internal/type/models"
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -22,12 +22,12 @@ import (
 // @Description Creates a new user account with username and password
 // @Tags auth
 // @Produce json
-// @Param user body model.Users true "User registration data"
-// @Success 200 {object} model.APIError
-// @Failure 400 {object} model.APIError
-// @Failure 406 {object} model.APIError
-// @Failure 409 {object} model.APIError
-// @Failure 500 {object} model.APIError
+// @Param user body models.Users true "User registration data"
+// @Success 200 {object} models.APIError
+// @Failure 400 {object} models.APIError
+// @Failure 406 {object} models.APIError
+// @Failure 409 {object} models.APIError
+// @Failure 500 {object} models.APIError
 // @Router /auth/register [post]
 func Signup(ctx *gin.Context) {
 	var dbConn = database.Conn
@@ -88,11 +88,11 @@ func Signup(ctx *gin.Context) {
 // @Description Authenticates user and returns session cookies
 // @Tags auth
 // @Produce json
-// @Param user body model.User true "User registration data"
-// @Success 200 {object} model.APIError
-// @Failure 400 {object} model.APIError
-// @Failure 401 {object} model.APIError
-// @Failure 500 {object} model.APIError
+// @Param user body models.Users true "User registration data"
+// @Success 200 {object} models.APIError
+// @Failure 400 {object} models.APIError
+// @Failure 401 {object} models.APIError
+// @Failure 500 {object} models.APIError
 // @Router /auth/login [post]
 func Login(ctx *gin.Context) {
 	var dbConn = database.Conn
@@ -143,8 +143,8 @@ func Login(ctx *gin.Context) {
 // @Summary	Logout user.
 // @Tags		auth
 // @Produce	json
-// @Success	200		{array}		model.APIError
-// @Failure	500		{object}	model.APIError
+// @Success	200		{array}		models.APIError
+// @Failure	500		{object}	models.APIError
 // @Router		/auth/logout [get]
 func Logout(ctx *gin.Context) {
 	// Delete the JWT cookie

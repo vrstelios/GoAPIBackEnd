@@ -37,18 +37,27 @@ func SetupRoutes(router *gin.Engine) {
 		routerEndpoints.GET("/coach/:name", auth.RoleMiddleware("admin"), api.GetCoach)
 		routerEndpoints.POST("/coach", auth.RoleMiddleware("admin"), api.PostCoach)
 
+		// Workout endpoints
+		routerEndpoints.POST("/workouts", api.PostWorkout)
+		routerEndpoints.GET("/workouts/:id", api.GetWorkout)
+		routerEndpoints.GET("/workouts", api.QueryWorkouts)
+		routerEndpoints.PUT("/workouts/:id", api.PutWorkout)
+		routerEndpoints.DELETE("/workouts/:id", api.DelWorkout)
+		routerEndpoints.POST("/workouts/query", api.QueryWorkoutsV2)
+
 		// GraphQL endpoint
+		//GET /workouts/scheduled?from=...?to=...?
 		/*routerEndpoints.POST("/graphql", func(ctx *gin.Context) {
 			graphqlHandler.ServeHTTP(ctx.Writer, ctx.Request)
 		})
 
 
-		routerEndpoints.GET("/tasks", Query)
-		routerEndpoints.GET("/tasks/:id", Get)
-		routerEndpoints.POST("/tasks", RoleMiddleware("admin"), Post)
-		routerEndpoints.PUT("/tasks/:id", Put)
+		//routerEndpoints.GET("/tasks", Query)
+		//routerEndpoints.GET("/tasks/:id", Get)
+		//routerEndpoints.POST("/tasks", RoleMiddleware("admin"), Post)
+		/*routerEndpoints.PUT("/tasks/:id", Put)
 		routerEndpoints.DELETE("/tasks/:id", Del)
-		routerEndpoints.POST("/download/images", DownloadUrls)
+		routerEndpoints.POST("/download/images", DownloadUrls) xlsx
 		routerEndpoints.POST("/tasks/query", QueryTasksV2)*/
 	}
 }

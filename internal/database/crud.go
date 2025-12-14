@@ -1,7 +1,7 @@
 package database
 
 import (
-	"GoAPIBackEnd/internal/models"
+	"GoAPIBackEnd/internal/type/models"
 	"context"
 	"database/sql"
 	"fmt"
@@ -168,6 +168,90 @@ func GetCoach(conn *pgx.Conn, name string, addRelations bool) ([]*models.Coach, 
 func PostCoach(conn *pgx.Conn, coach models.Coach) error {
 	masterSql := `INSERT INTO coach (id, name, user_id) VALUES ($1, $2, $3)`
 	_, err := conn.Exec(context.Background(), masterSql, coach.Id, coach.Name, coach.UserId)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func PostWorkout(conn *pgx.Conn, w models.Workouts) error {
+	masterSql := `INSERT INTO workouts (id,user_id, name, notes, scheduled_at) VALUES ($1, $2, $3, $4, $5)`
+	_, err := conn.Exec(context.Background(), masterSql, w.Id, w.UserId, w.Name, w.Notes, w.ScheduledAt)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func GetWorkout(conn *pgx.Conn, id string, name string, addRelations bool) ([]*models.Workouts, error) {
+	var results = make([]*models.Workouts, 0)
+	var r pgx.Rows
+	var err error
+
+	masterSql := `SELECT id, user_id, name, notes, scheduled_at, created_at FROM workouts`
+	var counter int = 0
+	var params []interface{}
+	if len(id) > 0 {
+		counter++
+		params = append(params, id)
+		masterSql = masterSql + fmt.Sprintf(" and id = $%d", counter)
+	}
+	if len(name) > 0 {
+		counter++
+		params = append(params, name)
+		masterSql = masterSql + fmt.Sprintf(" and name = $%d", counter)
+	}
+
+	masterSql = strings.Replace(masterSql, " and ", " where ", 1)
+
+	r, err = conn.Query(context.Background(), masterSql, params...)
+	if err != nil {
+		return nil, err
+	}
+	for r.Next() {
+		e := &models.Workouts{}
+		tmpNotes := sql.NullString{}
+		tmpScheduledAt := sql.NullTime{}
+		err = r.Scan(&e.Id, &e.UserId, &e.Name, &tmpNotes, &tmpScheduledAt, &e.CreatedAt)
+		if tmpNotes.Valid {
+			e.Notes = &tmpNotes.String
+		}
+		if tmpScheduledAt.Valid {
+			e.ScheduledAt = &tmpScheduledAt.Time
+		}
+
+		results = append(results, e)
+	}
+	r.Close()
+
+	if addRelations {
+		for i := range results {
+			relations := models.WorkoutsRelations{}
+			user, err := GetUser(conn, results[i].UserId, "") // Αλλαγή εδώ
+			if err != nil {
+				return nil, err
+			}
+			relations.Users = user[0]
+
+			results[i].Relations = &relations
+		}
+	}
+
+	return results, nil
+}
+
+func PutWorkout(conn *pgx.Conn, workout models.Workouts) error {
+	query := `UPDATE workouts SET  user_id = $1, name = $2, notes = $3, scheduled_at = $4, created_at = $5 WHERE id = $6`
+	_, err := conn.Exec(context.Background(), query, workout.UserId, workout.Name, workout.Notes, workout.ScheduledAt, workout.CreatedAt, workout.Id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func DelWorkout(conn *pgx.Conn, id string) error {
+	query := `DELETE FROM workouts WHERE id = $1`
+	_, err := conn.Exec(context.Background(), query, id)
 	if err != nil {
 		return err
 	}

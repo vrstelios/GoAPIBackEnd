@@ -18,6 +18,46 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/Coach/{name}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Coach"
+                ],
+                "summary": "Get Coach.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Coach Name",
+                        "name": "Name",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Coach"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.APIError"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/login": {
             "post": {
                 "description": "Authenticates user and returns session cookies",
@@ -35,7 +75,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.User"
+                            "$ref": "#/definitions/models.Users"
                         }
                     }
                 ],
@@ -43,25 +83,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.APIError"
+                            "$ref": "#/definitions/models.APIError"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/model.APIError"
+                            "$ref": "#/definitions/models.APIError"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/model.APIError"
+                            "$ref": "#/definitions/models.APIError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/model.APIError"
+                            "$ref": "#/definitions/models.APIError"
                         }
                     }
                 }
@@ -82,14 +122,14 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/model.APIError"
+                                "$ref": "#/definitions/models.APIError"
                             }
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/model.APIError"
+                            "$ref": "#/definitions/models.APIError"
                         }
                     }
                 }
@@ -112,7 +152,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.User"
+                            "$ref": "#/definitions/models.Users"
                         }
                     }
                 ],
@@ -120,53 +160,53 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.APIError"
+                            "$ref": "#/definitions/models.APIError"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/model.APIError"
+                            "$ref": "#/definitions/models.APIError"
                         }
                     },
                     "406": {
                         "description": "Not Acceptable",
                         "schema": {
-                            "$ref": "#/definitions/model.APIError"
+                            "$ref": "#/definitions/models.APIError"
                         }
                     },
                     "409": {
                         "description": "Conflict",
                         "schema": {
-                            "$ref": "#/definitions/model.APIError"
+                            "$ref": "#/definitions/models.APIError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/model.APIError"
+                            "$ref": "#/definitions/models.APIError"
                         }
                     }
                 }
             }
         },
-        "/download/images": {
+        "/coach": {
             "post": {
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Task"
+                    "Coach"
                 ],
-                "summary": "Download images",
+                "summary": "Create Coach.",
                 "parameters": [
                     {
-                        "description": "Urls",
+                        "description": "Coach",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.Urls"
+                            "$ref": "#/definitions/models.Coach"
                         }
                     }
                 ],
@@ -174,88 +214,79 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.DownloadImages"
+                            "$ref": "#/definitions/models.APIError"
+                        }
+                    },
+                    "208": {
+                        "description": "Already Reported",
+                        "schema": {
+                            "$ref": "#/definitions/models.APIError"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/model.APIError"
-                        }
-                    },
-                    "408": {
-                        "description": "Request Timeout",
-                        "schema": {
-                            "$ref": "#/definitions/model.APIError"
+                            "$ref": "#/definitions/models.APIError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/model.APIError"
+                            "$ref": "#/definitions/models.APIError"
                         }
                     }
                 }
             }
         },
-        "/tasks": {
+        "/exercises": {
             "get": {
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Task"
+                    "Exercise"
                 ],
-                "summary": "Query Task.",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Task Id",
-                        "name": "id",
-                        "in": "query"
-                    }
-                ],
+                "summary": "Query Exercises.",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/model.Task"
+                                "$ref": "#/definitions/models.Exercises"
                             }
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/model.APIError"
+                            "$ref": "#/definitions/models.APIError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/model.APIError"
+                            "$ref": "#/definitions/models.APIError"
                         }
                     }
                 }
             },
             "post": {
-                "description": "Notes:\u003cbr\u003eLeave the \"relations\" sub-entity empty.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Task"
+                    "Exercise"
                 ],
-                "summary": "Create Task.",
+                "summary": "Create Exercise.",
                 "parameters": [
                     {
-                        "description": "Task",
+                        "description": "Exercise",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.Task"
+                            "$ref": "#/definitions/models.Exercises"
                         }
                     }
                 ],
@@ -263,85 +294,43 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.APIError"
+                            "$ref": "#/definitions/models.APIError"
                         }
                     },
                     "208": {
                         "description": "Already Reported",
                         "schema": {
-                            "$ref": "#/definitions/model.APIError"
+                            "$ref": "#/definitions/models.APIError"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/model.APIError"
+                            "$ref": "#/definitions/models.APIError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/model.APIError"
+                            "$ref": "#/definitions/models.APIError"
                         }
                     }
                 }
             }
         },
-        "/tasks/query": {
-            "post": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Task"
-                ],
-                "summary": "Query Task (server side filtering \u0026 paging)",
-                "parameters": [
-                    {
-                        "description": "QueryTasksRequest",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/model.QueryTasksRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.QueryTasksResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/model.APIError"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/model.APIError"
-                        }
-                    }
-                }
-            }
-        },
-        "/tasks/{id}": {
+        "/exercises/{id}": {
             "get": {
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Task"
+                    "Exercise"
                 ],
-                "summary": "Get Task.",
+                "summary": "Get Exercise.",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Task Id",
+                        "description": "Exercise Id",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -351,19 +340,139 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.Task"
+                            "$ref": "#/definitions/models.Exercises"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/model.APIError"
+                            "$ref": "#/definitions/models.APIError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/model.APIError"
+                            "$ref": "#/definitions/models.APIError"
+                        }
+                    }
+                }
+            }
+        },
+        "/workouts": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Workouts"
+                ],
+                "summary": "Query Workouts.",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Workouts"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.APIError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Workouts"
+                ],
+                "summary": "Create Workout.",
+                "parameters": [
+                    {
+                        "description": "Workout",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Workouts"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.APIError"
+                        }
+                    },
+                    "208": {
+                        "description": "Already Reported",
+                        "schema": {
+                            "$ref": "#/definitions/models.APIError"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.APIError"
+                        }
+                    }
+                }
+            }
+        },
+        "/workouts/{id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Workouts"
+                ],
+                "summary": "Get Workout.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workouts Id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Workouts"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.APIError"
                         }
                     }
                 }
@@ -373,23 +482,23 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Task"
+                    "Workouts"
                 ],
-                "summary": "Update Task.",
+                "summary": "Update Workout.",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Task",
+                        "description": "Workout",
                         "name": "id",
                         "in": "path"
                     },
                     {
-                        "description": "Task",
+                        "description": "Workouts",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.Task"
+                            "$ref": "#/definitions/models.Workouts"
                         }
                     }
                 ],
@@ -399,63 +508,26 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/model.Task"
+                                "$ref": "#/definitions/models.Workouts"
                             }
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/model.APIError"
+                            "$ref": "#/definitions/models.APIError"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/model.APIError"
+                            "$ref": "#/definitions/models.APIError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/model.APIError"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Task"
-                ],
-                "summary": "Delete Task.",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Task",
-                        "name": "id",
-                        "in": "path"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.APIError"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/model.APIError"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/model.APIError"
+                            "$ref": "#/definitions/models.APIError"
                         }
                     }
                 }
@@ -463,7 +535,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "model.APIError": {
+        "models.APIError": {
             "type": "object",
             "properties": {
                 "code": {
@@ -476,91 +548,119 @@ const docTemplate = `{
                 }
             }
         },
-        "model.DownloadImages": {
+        "models.Coach": {
             "type": "object",
             "properties": {
-                "error": {},
-                "success": {
-                    "type": "boolean"
+                "id": {
+                    "type": "string"
                 },
-                "url": {
+                "name": {
+                    "type": "string"
+                },
+                "relationships": {
+                    "$ref": "#/definitions/models.CoachRelations"
+                },
+                "userId": {
                     "type": "string"
                 }
             }
         },
-        "model.QueryPagingRequest": {
+        "models.CoachRelations": {
             "type": "object",
             "properties": {
-                "page": {
-                    "type": "integer",
-                    "minimum": 0
-                },
-                "pageSize": {
-                    "type": "integer"
+                "users": {
+                    "$ref": "#/definitions/models.Users"
                 }
             }
         },
-        "model.QueryTasksRequest": {
+        "models.Exercises": {
             "type": "object",
             "properties": {
-                "paging": {
-                    "$ref": "#/definitions/model.QueryPagingRequest"
-                },
-                "search": {
+                "category": {
                     "type": "string"
-                }
-            }
-        },
-        "model.QueryTasksResponse": {
-            "type": "object",
-            "properties": {
-                "tasks": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/model.Task"
-                    }
                 },
-                "totalPages": {
-                    "type": "integer"
+                "createdAt": {
+                    "type": "string"
                 },
-                "totalResults": {
-                    "type": "integer"
-                }
-            }
-        },
-        "model.Task": {
-            "type": "object",
-            "properties": {
-                "done": {
-                    "type": "boolean"
+                "description": {
+                    "type": "string"
                 },
                 "id": {
                     "type": "string"
                 },
-                "title": {
+                "name": {
                     "type": "string"
                 }
             }
         },
-        "model.Urls": {
+        "models.Users": {
             "type": "object",
             "properties": {
-                "urls": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            }
-        },
-        "model.User": {
-            "type": "object",
-            "properties": {
+                "coachId": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
                 "password": {
                     "type": "string"
                 },
-                "username": {
+                "relationships": {
+                    "$ref": "#/definitions/models.UsersRelations"
+                },
+                "role": {
                     "type": "string"
+                }
+            }
+        },
+        "models.UsersRelations": {
+            "type": "object",
+            "properties": {
+                "coach": {
+                    "$ref": "#/definitions/models.Coach"
+                }
+            }
+        },
+        "models.Workouts": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "relationships": {
+                    "$ref": "#/definitions/models.WorkoutsRelations"
+                },
+                "scheduledAt": {
+                    "type": "string"
+                },
+                "userId": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.WorkoutsRelations": {
+            "type": "object",
+            "properties": {
+                "Users": {
+                    "$ref": "#/definitions/models.Users"
                 }
             }
         }
@@ -569,7 +669,7 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "1.2",
+	Version:          "1.3",
 	Host:             "",
 	BasePath:         "/api",
 	Schemes:          []string{},

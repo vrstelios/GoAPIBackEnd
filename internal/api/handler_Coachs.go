@@ -3,7 +3,7 @@ package api
 import (
 	"GoAPIBackEnd/internal/apperrors"
 	"GoAPIBackEnd/internal/database"
-	"GoAPIBackEnd/internal/models"
+	"GoAPIBackEnd/internal/type/models"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -13,11 +13,11 @@ import (
 // @Summary Create Coach.
 // @Tags Coach
 // @Produce json
-// @Param request body model.Coach true "Coach"
-// @Success 200 {object} model.APIError
-// @Failure 208 {object} model.APIError
-// @Failure 400 {object} model.APIError
-// @Failure 500 {object} model.APIError
+// @Param request body models.Coach true "Coach"
+// @Success 200 {object} models.APIError
+// @Failure 208 {object} models.APIError
+// @Failure 400 {object} models.APIError
+// @Failure 500 {object} models.APIError
 // @Router /coach [post]
 func PostCoach(ctx *gin.Context) {
 	var dbConn = database.Conn
@@ -43,7 +43,7 @@ func PostCoach(ctx *gin.Context) {
 	}
 
 	if len(coach) > 0 {
-		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusConflict, "EXERCISE_EXISTS", fmt.Errorf("Exercise already exists")))
+		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusConflict, "EXERCISE_EXISTS", fmt.Errorf("Coach already exists")))
 		return
 	}
 
@@ -60,9 +60,9 @@ func PostCoach(ctx *gin.Context) {
 // @Tags Coach
 // @Produce json
 // @Param Name path string true "Coach Name"
-// @Success 200 {object} model.Exercise
-// @Failure 404 {object} model.APIError
-// @Failure 500 {object} model.APIError
+// @Success 200 {object} models.Coach
+// @Failure 404 {object} models.APIError
+// @Failure 500 {object} models.APIError
 // @Router /Coach/{name} [get]
 func GetCoach(ctx *gin.Context) {
 	var dbConn = database.Conn
@@ -74,7 +74,7 @@ func GetCoach(ctx *gin.Context) {
 		return
 	}
 	if len(coach) == 0 {
-		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusNotFound, "EXERCISE_NOT_FOUND", fmt.Errorf("Exercise with name '%s' not found", name)))
+		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusNotFound, "EXERCISE_NOT_FOUND", fmt.Errorf("Coach with name '%s' not found", name)))
 		return
 	}
 

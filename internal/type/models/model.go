@@ -25,22 +25,7 @@ type DownloadImages struct {
 	Error   error  `json:"error"`
 }
 
-type QueryTasksRequest struct {
-	Search string             `json:"search"`
-	Paging QueryPagingRequest `json:"paging"`
-	//Ordering int                `json:"ordering"`
-}
-
-type QueryTasksResponse struct {
-	TotalResults int    `json:"totalResults"`
-	TotalPages   int    `json:"totalPages"`
-	Tasks        []Task `json:"tasks"`
-}
-
-type QueryPagingRequest struct {
-	PageSize int `json:"pageSize" binding:"gt=0"`
-	Page     int `json:"page" binding:"gte=0"`
-}*/
+*/
 
 type APIError struct {
 	Code    int    `json:"code" example:"400"`
