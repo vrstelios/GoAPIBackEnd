@@ -1,5 +1,33 @@
 basePath: /api
 definitions:
+  misc.QueryPagingRequest:
+    properties:
+      page:
+        minimum: 0
+        type: integer
+      pageSize:
+        type: integer
+    type: object
+  misc.QueryWorkoutsRequest:
+    properties:
+      ordering:
+        type: integer
+      paging:
+        $ref: '#/definitions/misc.QueryPagingRequest'
+      search:
+        type: string
+    type: object
+  misc.QueryWorkoutsResponse:
+    properties:
+      totalPages:
+        type: integer
+      totalResults:
+        type: integer
+      workouts:
+        items:
+          $ref: '#/definitions/models.Workouts'
+        type: array
+    type: object
   models.APIError:
     properties:
       code:
@@ -366,6 +394,30 @@ paths:
       tags:
       - Workouts
   /workouts/{id}:
+    delete:
+      parameters:
+      - description: Workout
+        in: path
+        name: id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.APIError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.APIError'
+      summary: Delete Workout.
+      tags:
+      - Workouts
     get:
       parameters:
       - description: Workouts Id
@@ -425,6 +477,33 @@ paths:
           schema:
             $ref: '#/definitions/models.APIError'
       summary: Update Workout.
+      tags:
+      - Workouts
+  /workouts/query:
+    post:
+      parameters:
+      - description: QueryWorkoutsRequest
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/misc.QueryWorkoutsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/misc.QueryWorkoutsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.APIError'
+      summary: Query Workouts (server side filtering & paging)
       tags:
       - Workouts
 swagger: "2.0"

@@ -30,5 +30,4 @@ func main() {
 func init() {
 	config.LoadEnvVariables()
 	database.InitDatabase()
-	//database.SyncDatabase()
 }

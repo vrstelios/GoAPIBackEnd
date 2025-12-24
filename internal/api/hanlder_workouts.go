@@ -178,8 +178,8 @@ func DelWorkout(ctx *gin.Context) {
 // @Produce	json
 // @Param		request	body		misc.QueryWorkoutsRequest	true	"QueryWorkoutsRequest"
 // @Success	200		{object}	misc.QueryWorkoutsResponse
-// @Failure	400		{object}	model.APIError
-// @Failure	500		{object}	model.APIError
+// @Failure	400		{object}	models.APIError
+// @Failure	500		{object}	models.APIError
 // @Router		/workouts/query [post]
 func QueryWorkoutsV2(ctx *gin.Context) {
 	var dbConn = database.Conn

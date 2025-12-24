@@ -438,6 +438,48 @@ const docTemplate = `{
                 }
             }
         },
+        "/workouts/query": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Workouts"
+                ],
+                "summary": "Query Workouts (server side filtering \u0026 paging)",
+                "parameters": [
+                    {
+                        "description": "QueryWorkoutsRequest",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/misc.QueryWorkoutsRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/misc.QueryWorkoutsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.APIError"
+                        }
+                    }
+                }
+            }
+        },
         "/workouts/{id}": {
             "get": {
                 "produces": [
@@ -531,10 +573,90 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "delete": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Workouts"
+                ],
+                "summary": "Delete Workout.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workout",
+                        "name": "id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.APIError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.APIError"
+                        }
+                    }
+                }
             }
         }
     },
     "definitions": {
+        "misc.QueryPagingRequest": {
+            "type": "object",
+            "properties": {
+                "page": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "pageSize": {
+                    "type": "integer"
+                }
+            }
+        },
+        "misc.QueryWorkoutsRequest": {
+            "type": "object",
+            "properties": {
+                "ordering": {
+                    "type": "integer"
+                },
+                "paging": {
+                    "$ref": "#/definitions/misc.QueryPagingRequest"
+                },
+                "search": {
+                    "type": "string"
+                }
+            }
+        },
+        "misc.QueryWorkoutsResponse": {
+            "type": "object",
+            "properties": {
+                "totalPages": {
+                    "type": "integer"
+                },
+                "totalResults": {
+                    "type": "integer"
+                },
+                "workouts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Workouts"
+                    }
+                }
+            }
+        },
         "models.APIError": {
             "type": "object",
             "properties": {

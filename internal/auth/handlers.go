@@ -43,57 +43,6 @@ func DownloadUrls(ctx *gin.Context) {
 
 	apperrors.GetAPIError(ctx, gin.H{"results": results}, http.StatusOK, nil)
 }
-
-// @Summary	Query Task (server side filtering & paging)
-// @Tags		Task
-// @Produce	json
-// @Param		request	body		model.QueryTasksRequest	true	"QueryTasksRequest"
-// @Success	200		{object}	model.QueryTasksResponse
-// @Failure	400		{object}	model.APIError
-// @Failure	500		{object}	model.APIError
-// @Router		/tasks/query [post]
-func QueryTasksV2(ctx *gin.Context) {
-	queryRequest := models.QueryTasksRequest{}
-	err := ctx.ShouldBindJSON(&queryRequest)
-	if err != nil {
-		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusBadRequest, "INVALID_REQUEST", err))
-		return
-	}
-
-	var filtered []models.Task
-	for _, task := range models.LibTasks {
-		if strings.Contains(strings.ToLower(task.Title), strings.ToLower(queryRequest.Search)) {
-			filtered = append(filtered, *task)
-		}
-	}
-
-	totalRows := len(filtered)
-	if totalRows == 0 {
-		apperrors.GetAPIError(ctx, models.QueryTasksResponse{TotalResults: totalRows, TotalPages: 0, Tasks: []models.Task{}}, http.StatusOK, nil)
-		return
-	}
-
-	totalPages := int(math.Ceil(float64(totalRows) / float64(queryRequest.Paging.PageSize)))
-
-	startPage := (queryRequest.Paging.Page - 1) * queryRequest.Paging.PageSize
-	endPage := startPage + queryRequest.Paging.PageSize
-
-	switch {
-	case startPage > totalRows:
-		startPage = totalRows
-	case endPage > totalRows:
-		endPage = totalRows
-	}
-
-	pagedTasks := filtered[startPage:endPage]
-
-	response := models.QueryTasksResponse{
-		TotalResults: totalRows,
-		TotalPages:   totalPages,
-		Tasks:        pagedTasks,
-	}
-	apperrors.GetAPIError(ctx, response, http.StatusOK, nil)
-}
 */
 
 /*func downLoadImage(url string, ch chan<- models.DownloadImages) {

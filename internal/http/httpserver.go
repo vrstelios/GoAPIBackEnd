@@ -4,7 +4,9 @@ import (
 	_ "GoAPIBackEnd/docs"
 	"GoAPIBackEnd/internal/api"
 	"GoAPIBackEnd/internal/auth"
+	"GoAPIBackEnd/internal/graphql"
 	"github.com/gin-gonic/gin"
+	"github.com/graphql-go/handler"
 	"github.com/swaggo/files"
 	"github.com/swaggo/gin-swagger"
 )
@@ -14,11 +16,11 @@ func SetupRoutes(router *gin.Engine) {
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// GraphQL handler
-	/*graphqlHandler := handler.New(&handler.Config{
+	graphqlHandler := handler.New(&handler.Config{
 		Schema:   &graphql.Schema,
 		Pretty:   true,
 		GraphiQL: true,
-	})*/
+	})
 
 	routerEndpoints := router.Group("/api")
 
@@ -46,18 +48,12 @@ func SetupRoutes(router *gin.Engine) {
 		routerEndpoints.POST("/workouts/query", api.QueryWorkoutsV2)
 
 		// GraphQL endpoint
-		//GET /workouts/scheduled?from=...?to=...?
-		/*routerEndpoints.POST("/graphql", func(ctx *gin.Context) {
+		//Συνδυάζεις πολλαπλά tables, joins, filters, pagination, ακόμα και πολύπλοκα reports, σε ένα query
+		routerEndpoints.POST("/graphql/workouts/log", func(ctx *gin.Context) {
 			graphqlHandler.ServeHTTP(ctx.Writer, ctx.Request)
 		})
 
-
-		//routerEndpoints.GET("/tasks", Query)
-		//routerEndpoints.GET("/tasks/:id", Get)
-		//routerEndpoints.POST("/tasks", RoleMiddleware("admin"), Post)
-		/*routerEndpoints.PUT("/tasks/:id", Put)
-		routerEndpoints.DELETE("/tasks/:id", Del)
-		routerEndpoints.POST("/download/images", DownloadUrls) xlsx
-		routerEndpoints.POST("/tasks/query", QueryTasksV2)*/
+		//routerEndpoints.POST("/download/images", DownloadUrls) xlsx
+		//routerEndpoints.POST("/tasks/query", QueryTasksV2)*/
 	}
 }

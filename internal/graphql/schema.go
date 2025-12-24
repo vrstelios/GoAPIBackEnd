@@ -1,91 +1,69 @@
 package graphql
 
 import (
-	"GoAPIBackEnd/internal/models"
+	"GoAPIBackEnd/internal/database"
+	"GoAPIBackEnd/internal/type/models"
+	"github.com/google/uuid"
 	"github.com/graphql-go/graphql"
-	"strings"
 )
 
-// Create GraphQL Object type with name TaskType
-var TaskType = graphql.NewObject(graphql.ObjectConfig{
-	Name: "Task",
+// Create GraphQL Object type with name WorkoutLogType
+var WorkoutLogType = graphql.NewObject(graphql.ObjectConfig{
+	Name: "WorkoutLog",
 	Fields: graphql.Fields{
 		"id": &graphql.Field{
 			Type: graphql.String,
 		},
-		"title": &graphql.Field{
+		"workoutId": &graphql.Field{
 			Type: graphql.String,
 		},
-		"done": &graphql.Field{
-			Type: graphql.Boolean,
+		"userId": &graphql.Field{
+			Type: graphql.String,
+		},
+	},
+})
+
+var RootMutation = graphql.NewObject(graphql.ObjectConfig{
+	Name: "RootMutation",
+	Fields: graphql.Fields{
+		"completeWorkout": &graphql.Field{
+			Type: WorkoutLogType,
+			Args: graphql.FieldConfigArgument{
+				"workoutId": &graphql.ArgumentConfig{
+					Type: graphql.NewNonNull(graphql.String),
+				},
+				"userId": &graphql.ArgumentConfig{
+					Type: graphql.NewNonNull(graphql.String),
+				},
+			},
+			Resolve: func(params graphql.ResolveParams) (interface{}, error) {
+				var dbConn = database.Conn
+				workoutId := params.Args["workoutId"].(string)
+				userId := params.Args["userId"].(string)
+
+				log := models.WorkoutLog{
+					Id:        uuid.NewString(),
+					WorkoutId: workoutId,
+					UserId:    userId,
+				}
+
+				err := database.PostWorkoutLog(dbConn, log)
+				if err != nil {
+					return nil, err
+				}
+
+				return log, nil
+			},
 		},
 	},
 })
 
 var RootQuery = graphql.NewObject(graphql.ObjectConfig{
-	Name: "RootQuery",
-	Fields: graphql.Fields{
-		"tasks": &graphql.Field{
-			Type: graphql.NewList(TaskType),
-			Resolve: func(params graphql.ResolveParams) (interface{}, error) {
-				var tasks []models.Task
-				for _, t := range models.LibTasks {
-					tasks = append(tasks, *t)
-				}
-				return tasks, nil
-			},
-		},
-		"task": &graphql.Field{
-			Type: graphql.NewList(TaskType),
-			Args: graphql.FieldConfigArgument{
-				"done": &graphql.ArgumentConfig{
-					Type: graphql.Boolean,
-				},
-				"titleContains": &graphql.ArgumentConfig{
-					Type: graphql.String,
-				},
-				"limit": &graphql.ArgumentConfig{
-					Type: graphql.Int,
-				},
-				"offset": &graphql.ArgumentConfig{
-					Type: graphql.Int,
-				},
-			},
-			Resolve: func(params graphql.ResolveParams) (interface{}, error) {
-				doneFilter, _ := params.Args["done"].(bool)
-				titleContains, _ := params.Args["titleContains"].(string)
-				limit, limitProvided := params.Args["limit"].(int)
-				offset, offsetProvided := params.Args["offset"].(int)
-
-				var filtered []models.Task
-				for _, t := range models.LibTasks {
-					if titleContains != "" && !strings.Contains(strings.ToLower(t.Title), strings.ToLower(titleContains)) {
-						continue
-					}
-					if _, ok := params.Args["done"]; ok && t.Done != doneFilter {
-						continue
-					}
-					filtered = append(filtered, *t)
-				}
-
-				if offsetProvided {
-					if offset > len(filtered) {
-						filtered = []models.Task{}
-					} else {
-						filtered = filtered[offset:]
-					}
-				}
-
-				if limitProvided && limit < len(filtered) {
-					filtered = filtered[:limit]
-				}
-
-				return filtered, nil
-			},
-		},
-	},
+	Name:   "RootQuery",
+	Fields: graphql.Fields{},
 })
 
 var Schema, _ = graphql.NewSchema(graphql.SchemaConfig{
-	Query: RootQuery,
+	Query:    RootQuery, //continue
+	Mutation: RootMutation,
 })

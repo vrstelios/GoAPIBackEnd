@@ -257,3 +257,12 @@ func DelWorkout(conn *pgx.Conn, id string) error {
 	}
 	return nil
 }
+
+func PostWorkoutLog(conn *pgx.Conn, wl models.WorkoutLog) error {
+	masterSql := `insert into workout_log (id, user_id, workout_id) values ( $1, $2, $3)`
+	_, err := conn.Exec(context.Background(), masterSql, wl.Id, wl.UserId, wl.WorkoutId)
+	if err != nil {
+		return err
+	}
+	return nil
+}
