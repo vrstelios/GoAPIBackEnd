@@ -1,15 +1,15 @@
 package main
 
 import (
-	"GoAPIBackEnd/config"
 	"GoAPIBackEnd/internal"
+	"GoAPIBackEnd/internal/api"
 	"GoAPIBackEnd/internal/database"
 	"fmt"
 	"os"
 )
 
 // @title 		  EndPoints
-// @version		  1.3
+// @version		  1.5
 // @description   A Tag service API in Go using Gin framework
 // @contact.name  DoctorVeRossi
 // @contact.url   https://github.com/vrstelios/GoAPIBackEnd
@@ -28,6 +28,6 @@ func main() {
 }
 
 func init() {
-	config.LoadEnvVariables()
 	database.InitDatabase()
+	api.Init()
 }

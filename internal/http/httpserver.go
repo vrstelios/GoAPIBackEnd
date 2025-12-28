@@ -28,6 +28,15 @@ func SetupRoutes(router *gin.Engine) {
 	routerEndpoints.POST("/auth/login", api.Login)
 	routerEndpoints.GET("/auth/logout", api.Logout)
 
+	// GraphQL endpoint
+	// Found workouts with userId and created logs
+	//Συνδυάζεις API Gateway, joins, filters, pagination, ακόμα και πολύπλοκα reports, σε ένα query
+	routerEndpoints.POST("/graphql/workouts/logs", func(ctx *gin.Context) {
+		graphqlHandler.ServeHTTP(ctx.Writer, ctx.Request)
+	})
+	routerEndpoints.POST("/workoutLogs", api.PostWorkoutLogs)
+	routerEndpoints.GET("/workouts", api.QueryWorkouts)
+
 	routerEndpoints.Use(auth.AuthJWTMiddleware())
 	{
 		// Exercises endpoints
@@ -42,16 +51,13 @@ func SetupRoutes(router *gin.Engine) {
 		// Workout endpoints
 		routerEndpoints.POST("/workouts", api.PostWorkout)
 		routerEndpoints.GET("/workouts/:id", api.GetWorkout)
-		routerEndpoints.GET("/workouts", api.QueryWorkouts)
+		//routerEndpoints.GET("/workouts", api.QueryWorkouts)
 		routerEndpoints.PUT("/workouts/:id", api.PutWorkout)
 		routerEndpoints.DELETE("/workouts/:id", api.DelWorkout)
 		routerEndpoints.POST("/workouts/query", api.QueryWorkoutsV2)
 
-		// GraphQL endpoint
-		//Συνδυάζεις πολλαπλά tables, joins, filters, pagination, ακόμα και πολύπλοκα reports, σε ένα query
-		routerEndpoints.POST("/graphql/workouts/log", func(ctx *gin.Context) {
-			graphqlHandler.ServeHTTP(ctx.Writer, ctx.Request)
-		})
+		// WorkoutLog endpoints
+		//routerEndpoints.POST("/workoutLogs", api.PostWorkoutLogs)
 
 		//routerEndpoints.POST("/download/images", DownloadUrls) xlsx
 		//routerEndpoints.POST("/tasks/query", QueryTasksV2)*/

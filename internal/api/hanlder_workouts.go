@@ -39,7 +39,7 @@ func PostWorkout(ctx *gin.Context) {
 		workout.Id = uid.String()
 	}
 
-	wk, err := database.GetWorkout(dbConn, workout.Id, "", false)
+	wk, err := database.GetWorkout(dbConn, workout.Id, "", "", false)
 	if err != nil {
 		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusInternalServerError, "DB_ERROR", err))
 		return
@@ -71,7 +71,7 @@ func GetWorkout(ctx *gin.Context) {
 	var dbConn = database.Conn
 	id := ctx.Param("id")
 
-	workout, err := database.GetWorkout(dbConn, id, "", true)
+	workout, err := database.GetWorkout(dbConn, id, "", "", true)
 	if err != nil {
 		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusInternalServerError, "DB_ERROR", err))
 		return
@@ -85,8 +85,10 @@ func GetWorkout(ctx *gin.Context) {
 }
 
 // @Summary	Query Workouts.
+// @Description Query workouts with optional user filtering
 // @Tags		Workouts
 // @Produce	json
+// @Param       userId  query    string  false  "Filter by user Id"
 // @Success	200		{array}		models.Workouts
 // @Failure 404     {object}    models.APIError
 // @Failure	500		{object}	models.APIError
@@ -94,7 +96,10 @@ func GetWorkout(ctx *gin.Context) {
 func QueryWorkouts(ctx *gin.Context) {
 	var dbConn = database.Conn
 
-	workout, err := database.GetWorkout(dbConn, "", "", true)
+	// Get all query parameters
+	userId := ctx.Query("userId")
+
+	workout, err := database.GetWorkout(dbConn, "", "", userId, true)
 	if err != nil {
 		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusInternalServerError, "DB_ERROR", err))
 		return
@@ -138,7 +143,7 @@ func PutWorkout(ctx *gin.Context) {
 		return
 	}
 
-	w, err := database.GetWorkout(dbConn, workout.Id, "", false)
+	w, err := database.GetWorkout(dbConn, workout.Id, "", "", false)
 	if err != nil {
 		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusInternalServerError, "DB_ERROR", err))
 		return

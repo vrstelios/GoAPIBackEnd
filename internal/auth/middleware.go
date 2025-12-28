@@ -7,7 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"net/http"
-	"os"
 	"strings"
 )
 
@@ -84,6 +83,5 @@ func RoleMiddleware(allowedRoles ...string) gin.HandlerFunc {
 }
 
 func init() {
-	config.LoadEnvVariables()
-	JwtSecret = []byte(os.Getenv("JWT_SECRET"))
+	JwtSecret = []byte(config.Get().JWTSecret)
 }

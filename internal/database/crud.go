@@ -183,7 +183,7 @@ func PostWorkout(conn *pgx.Conn, w models.Workouts) error {
 	return nil
 }
 
-func GetWorkout(conn *pgx.Conn, id string, name string, addRelations bool) ([]*models.Workouts, error) {
+func GetWorkout(conn *pgx.Conn, id string, name string, userId string, addRelations bool) ([]*models.Workouts, error) {
 	var results = make([]*models.Workouts, 0)
 	var r pgx.Rows
 	var err error
@@ -200,6 +200,11 @@ func GetWorkout(conn *pgx.Conn, id string, name string, addRelations bool) ([]*m
 		counter++
 		params = append(params, name)
 		masterSql = masterSql + fmt.Sprintf(" and name = $%d", counter)
+	}
+	if len(userId) > 0 {
+		counter++
+		params = append(params, userId)
+		masterSql = masterSql + fmt.Sprintf(" and user_id = $%d", counter)
 	}
 
 	masterSql = strings.Replace(masterSql, " and ", " where ", 1)
@@ -258,11 +263,13 @@ func DelWorkout(conn *pgx.Conn, id string) error {
 	return nil
 }
 
-func PostWorkoutLog(conn *pgx.Conn, wl models.WorkoutLog) error {
-	masterSql := `insert into workout_log (id, user_id, workout_id) values ( $1, $2, $3)`
-	_, err := conn.Exec(context.Background(), masterSql, wl.Id, wl.UserId, wl.WorkoutId)
-	if err != nil {
-		return err
+func PostWorkoutLog(conn *pgx.Conn, wls []models.WorkoutLog) error {
+	for _, wl := range wls {
+		masterSql := `insert into workout_log (id, user_id, workout_id) values ( $1, $2, $3)`
+		_, err := conn.Exec(context.Background(), masterSql, wl.Id, wl.UserId, wl.WorkoutId)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
