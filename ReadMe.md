@@ -2,7 +2,7 @@
 
 A RESTful API service built with Go and Gin framework, featuring JWT authentication, GraphQL support, and Swagger documentation.
 
-![APIs.png](APIs.png)
+![DiagramDataBase.png](DiagramDataBase.png)
 
 ## Project Structure
 
@@ -110,17 +110,21 @@ Then access Swagger UI at: `http://localhost:8080/swagger/index.html`
 ## API Endpoints
 
 ### Authentication
-- `POST /api/auth/register` - Register a new user
+- `POST /api/auth/signup` - Signup a new user
 - `POST /api/auth/login` - Login and get JWT token
 - `GET /api/auth/logout` - Logout
 
 ### Tasks (Protected - requires JWT)
-- `GET /api/tasks` - Get all tasks
-- `GET /api/tasks/:id` - Get task by ID
-- `POST /api/tasks` - Create task (admin only)
-- `PUT /api/tasks/:id` - Update task
-- `DELETE /api/tasks/:id` - Delete task
-- `POST /api/tasks/query` - Query tasks with filtering and pagination
+- `GET /api/exercises` - Get all exercises
+- `GET /api/exercises/:id` - Get exercises by Id
+- `POST /api/exercises` - Create Exercise only admin
+- `GET /api/coach/:name` - Get Coach only admin
+- `POST /api/coach` - Create Coach only admin
+- `POST /api/workouts` - Create Workout
+- `GET /api/workouts/:id` - Get Workout
+- `PUT /api/workouts/:id` - Update Workout
+- `DELETE /api/workouts/:id` - Delete Workout
+- `POST /api/workouts/query` - Query Workouts (server side filtering & paging)
 
 ### GraphQL
 - `POST /api/graphql/workouts/logs` - GraphQL endpoint (with GraphiQL interface)
@@ -129,6 +133,10 @@ Then access Swagger UI at: `http://localhost:8080/swagger/index.html`
 - `POST /api/download/images` - Download images from URLs
 
 ## Testing
+- `POST /api/auth/signup` - Signup a new user
+- `POST /api/auth/login` - Login and get JWT token
+- `POST /api/auth/signup` - Signup a new admin User
+- `POST /api/auth/login` - Login with admin User and get JWT token
 
 ```bash
 # Run all tests

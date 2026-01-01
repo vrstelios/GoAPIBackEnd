@@ -16,10 +16,6 @@ import (
 
 // TODO: Add route tests
 func TestRoutes(t *testing.T) {
-	type testWorkouts struct {
-		Search string
-	}
-
 	t.Run("valid login for a simple user", func(t *testing.T) {
 		// Define valid login for a simple user, err is nil by default
 		conn, err := pgx.Connect(context.Background(), "host=localhost user=postgres password=postgres port=5432 sslmode=disable")
