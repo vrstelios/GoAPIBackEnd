@@ -22,8 +22,14 @@ A RESTful API service built with Go and Gin framework, featuring JWT authenticat
 │   └── swagger.yaml         
 ├── internal/
 │   ├── api/                     # HTTP handlers
-│   │   ├──  handler_Exercise.go  
-│   │   └──  handler_Users.go    
+│   │   ├──  api.go
+│   │   ├──  client.go
+│   │   ├──  handler_Coach.go
+│   │   ├──  handler_Exercise.go
+│   │   ├──  handler_Users.go
+│   │   ├──  handler_WokroutLogs.go  
+│   │   ├──  handler_WokroutLogs.go 
+│   │   └──  handler_Wokrouts.go    
 │   ├── apperrors/
 │   │   ├──  apperror.go         # Error handlering
 │   ├── auth/
@@ -36,8 +42,13 @@ A RESTful API service built with Go and Gin framework, featuring JWT authenticat
 │   ├── http/
 │   │   ├── httpserver.go        # Route definitions
 │   │   └── httpserver_test.go   # Route tests
-│   ├── model/
-│   │   └── model.go             # Data models
+│   ├── type/                    # Data models
+│   │   ├── misc/    
+│   │   │    └── params.go         
+│   │   └── modeles/
+│   │   │    ├── exercises.go
+│   │   │    ├── users.go
+│   │   │    └── workouts.go             
 │   └── server.go                # Server initialization
 ├── .env                         # Include all variables
 ├── air.toml                     # Air live reload configuration
@@ -49,13 +60,15 @@ A RESTful API service built with Go and Gin framework, featuring JWT authenticat
 ## Features
 
 - RESTful API with Gin framework
+- Swagger/OpenAPI documentation
 - JWT-based authentication
+- Connect with database
 - Role-based access control (admin/user)
 - GraphQL endpoint with GraphiQL interface
-- Swagger/OpenAPI documentation
+- Test Routes API
 - Task management CRUD operations
-- Image download functionality
 - Server-side filtering and pagination
+- Image download functionality
 
 ## Prerequisites
 
@@ -110,7 +123,7 @@ Then access Swagger UI at: `http://localhost:8080/swagger/index.html`
 - `POST /api/tasks/query` - Query tasks with filtering and pagination
 
 ### GraphQL
-- `POST /api/graphql` - GraphQL endpoint (with GraphiQL interface)
+- `POST /api/graphql/workouts/logs` - GraphQL endpoint (with GraphiQL interface)
 
 ### Other
 - `POST /api/download/images` - Download images from URLs

@@ -18,7 +18,7 @@ import (
 	"time"
 )
 
-// @Summary Register a new user.
+// @Summary Signup a new user.
 // @Description Creates a new user account with username and password
 // @Tags auth
 // @Produce json
@@ -28,7 +28,7 @@ import (
 // @Failure 406 {object} models.APIError
 // @Failure 409 {object} models.APIError
 // @Failure 500 {object} models.APIError
-// @Router /auth/register [post]
+// @Router /auth/signup [post]
 func Signup(ctx *gin.Context) {
 	var dbConn = database.Conn
 

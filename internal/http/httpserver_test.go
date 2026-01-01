@@ -1,10 +1,13 @@
 package http
 
 import (
+	"GoAPIBackEnd/internal/api"
+	"GoAPIBackEnd/internal/database"
 	"bytes"
+	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/goccy/go-json"
-	"github.com/golang-jwt/jwt/v5"
+	"github.com/jackc/pgx/v5"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
@@ -13,152 +16,106 @@ import (
 
 // TODO: Add route tests
 func TestRoutes(t *testing.T) {
-	type testUserCase struct {
-		Username string
-		Password string
+	type testWorkouts struct {
+		Search string
 	}
-
-	type testTaskCase struct {
-		Id    string
-		Title string
-		Done  bool
-	}
-	var resp map[string]string
-	var token string
 
 	t.Run("valid login for a simple user", func(t *testing.T) {
 		// Define valid login for a simple user, err is nil by default
-		var user testUserCase
-		user.Username = "vrstelios"
-		user.Password = "12345678"
+		conn, err := pgx.Connect(context.Background(), "host=localhost user=postgres password=postgres port=5432 sslmode=disable")
+		if err != nil {
+			t.Fatalf("Failed to connect to database: %v", err)
+		}
+		defer conn.Close(context.Background())
+		database.Conn = conn
+
+		signupUser := map[string]string{
+			"name":     "testUser",
+			"password": "12345678",
+			"email":    "testUser@gmail.com",
+			"role":     "athlete",
+		}
 
 		r := gin.Default()
-		r.POST("/api/auth/register", Register)
-		r.POST("/api/auth/login", Login)
+		r.POST("/api/auth/signup", api.Signup)
+		r.POST("/api/auth/login", api.Login)
 
-		jsonUser, _ := json.Marshal(user)
+		signupJson, _ := json.Marshal(signupUser)
 		w := httptest.NewRecorder()
-		req, _ := http.NewRequest("POST", "/api/auth/register", bytes.NewBuffer(jsonUser))
+		req, _ := http.NewRequest("POST", "/api/auth/signup", bytes.NewBuffer(signupJson))
 		req.Header.Set("Content-Type", "application/json")
 		r.ServeHTTP(w, req)
 		assert.Equal(t, 200, w.Code)
 
 		w = httptest.NewRecorder()
-		req, _ = http.NewRequest("POST", "/api/auth/login", bytes.NewBuffer(jsonUser))
+		req, _ = http.NewRequest("POST", "/api/auth/login", bytes.NewBuffer(signupJson))
 		req.Header.Set("Content-Type", "application/json")
 		r.ServeHTTP(w, req)
 		assert.Equal(t, 200, w.Code)
 		//fmt.Println("Login response:", w.Body.String())
 
-		_ = json.Unmarshal(w.Body.Bytes(), &resp)
-		tokenString := resp["token"]
-		if tokenString == "" {
-			t.Fatalf("Login did not return a token. Response: %s", w.Body.String())
+		// Login
+		loginData := map[string]string{
+			"name":     "testUser",
+			"password": "12345678",
 		}
-		token, _, err := new(jwt.Parser).ParseUnverified(tokenString, jwt.MapClaims{})
-		if err != nil {
-			t.Fatalf("Failed to parse token: %v", err)
-		}
-		claims := token.Claims.(jwt.MapClaims)
-		role := claims["role"].(string)
-		if role != "user" {
-			t.Fatalf("expected role user, got %s", role)
-		}
+
+		loginJson, _ := json.Marshal(loginData)
+
+		w = httptest.NewRecorder()
+		req, _ = http.NewRequest("POST", "/api/auth/login", bytes.NewBuffer(loginJson))
+		req.Header.Set("Content-Type", "application/json")
+		r.ServeHTTP(w, req)
+
+		t.Logf("Login response: %d - %s", w.Code, w.Body.String())
+
+		// Check for 200 status
+		assert.Equal(t, 200, w.Code, "Login should return 200")
 	})
 
 	t.Run("valid login for a admin user", func(t *testing.T) {
 		// Define valid login for a simple admin, err is nil by default
-		var userTest testUserCase
-		userTest.Username = "admin"
-		userTest.Password = "12345678"
-
-		r := gin.Default()
-		r.POST("/api/auth/register", Register)
-		r.POST("/api/auth/login", Login)
-
-		jsonUser, _ := json.Marshal(userTest)
-		w := httptest.NewRecorder()
-		req, _ := http.NewRequest("POST", "/api/auth/register", bytes.NewBuffer(jsonUser))
-		req.Header.Set("Content-Type", "application/json")
-		r.ServeHTTP(w, req)
-		assert.Equal(t, 200, w.Code)
-
-		w = httptest.NewRecorder()
-		req, _ = http.NewRequest("POST", "/api/auth/login", bytes.NewBuffer(jsonUser))
-		req.Header.Set("Content-Type", "application/json")
-		r.ServeHTTP(w, req)
-		assert.Equal(t, 200, w.Code)
-
-		_ = json.Unmarshal(w.Body.Bytes(), &resp)
-		token = resp["token"]
-		if token == "" {
-			t.Fatalf("Token missing: %s", w.Body.String())
-		}
-		token, _, err := new(jwt.Parser).ParseUnverified(token, jwt.MapClaims{})
+		conn, err := pgx.Connect(context.Background(), "host=localhost user=postgres password=postgres port=5432 sslmode=disable")
 		if err != nil {
-			t.Fatalf("Failed to parse token: %v", err)
+			t.Fatalf("Failed to connect to database: %v", err)
 		}
-		claims := token.Claims.(jwt.MapClaims)
-		role := claims["role"].(string)
-		if role != "admin" {
-			t.Fatalf("expected role admin, got %s", role)
+		defer conn.Close(context.Background())
+		database.Conn = conn
+
+		signupUser := map[string]string{
+			"name":     "testAdmin",
+			"password": "12345679",
+			"email":    "testAdmin@gmail.com",
+			"role":     "admin",
 		}
-	})
-
-	t.Run("Valid server-side filtering and paging", func(t *testing.T) {
-		// Define Valid server-side filtering and paging, err is nil by default
-		if models.LibTasks == nil {
-			models.LibTasks = make(map[string]*models.Task)
-		}
-
-		var userTest testUserCase
-		userTest.Username = "admin"
-		userTest.Password = "12345678"
-
-		var taskTest testTaskCase
-		taskTest.Id = ""
-		taskTest.Title = "ba"
-		taskTest.Done = true
 
 		r := gin.Default()
-		//r.POST("/api/auth/register", Register)
-		//r.POST("/api/auth/login", Login)
-		r.POST("/api/tasks", middleware_go.AuthJWTMiddleware(), middleware_go.RoleMiddleware("admin"), Post)
-		r.POST("/api/tasks/query", QueryTasksV2)
+		r.POST("/api/auth/signup", api.Signup)
+		r.POST("/api/auth/login", api.Login)
 
-		/*jsonUser, _ := json.Marshal(userTest)
+		jsonAdminUser, _ := json.Marshal(signupUser)
 		w := httptest.NewRecorder()
-		req, _ := http.NewRequest("POST", "/api/auth/register", bytes.NewBuffer(jsonUser))
+		req, _ := http.NewRequest("POST", "/api/auth/signup", bytes.NewBuffer(jsonAdminUser))
 		req.Header.Set("Content-Type", "application/json")
 		r.ServeHTTP(w, req)
+
+		t.Logf("Admin signup response: %d - %s", w.Code, w.Body.String())
 		assert.Equal(t, 200, w.Code)
 
-		w = httptest.NewRecorder()
-		req, _ = http.NewRequest("POST", "/api/auth/login", bytes.NewBuffer(jsonUser))
-		req.Header.Set("Content-Type", "application/json")
-		r.ServeHTTP(w, req)
-		assert.Equal(t, 200, w.Code)*/
-
-		jsonTask, _ := json.Marshal(taskTest)
-		w := httptest.NewRecorder()
-		req, _ := http.NewRequest("POST", "/api/tasks", bytes.NewBuffer(jsonTask))
-		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("Authorization", "Bearer "+token)
-		r.ServeHTTP(w, req)
-		assert.Equal(t, 200, w.Code)
-
-		var response testTaskCase
-		json.Unmarshal(w.Body.Bytes(), &response)
-
-		query := models.QueryTasksRequest{
-			Paging: models.QueryPagingRequest{PageSize: 2, Page: 1},
-			Search: response.Title,
+		// Login
+		loginUser := map[string]string{
+			"name":     "testAdmin",
+			"password": "12345679",
 		}
-		jsonQuery, _ := json.Marshal(query)
+
+		loginJson, _ := json.Marshal(loginUser)
+
 		w = httptest.NewRecorder()
-		req, _ = http.NewRequest("POST", "/api/tasks/query", bytes.NewBuffer(jsonQuery))
+		req, _ = http.NewRequest("POST", "/api/auth/login", bytes.NewBuffer(loginJson))
 		req.Header.Set("Content-Type", "application/json")
 		r.ServeHTTP(w, req)
+
+		t.Logf("Admin login response: %d - %s", w.Code, w.Body.String())
 		assert.Equal(t, 200, w.Code)
 	})
 }

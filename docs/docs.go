@@ -135,7 +135,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/auth/register": {
+        "/auth/signup": {
             "post": {
                 "description": "Creates a new user account with username and password",
                 "produces": [
@@ -144,7 +144,7 @@ const docTemplate = `{
                 "tags": [
                     "auth"
                 ],
-                "summary": "Register a new user.",
+                "summary": "Signup a new user.",
                 "parameters": [
                     {
                         "description": "User registration data",
@@ -358,8 +358,57 @@ const docTemplate = `{
                 }
             }
         },
+        "/workoutLogs": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "WorkoutLog"
+                ],
+                "summary": "Create Workout Log.",
+                "parameters": [
+                    {
+                        "description": "Workout Log",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.WorkoutLog"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.APIError"
+                        }
+                    },
+                    "208": {
+                        "description": "Already Reported",
+                        "schema": {
+                            "$ref": "#/definitions/models.APIError"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.APIError"
+                        }
+                    }
+                }
+            }
+        },
         "/workouts": {
             "get": {
+                "description": "Query workouts with optional user filtering",
                 "produces": [
                     "application/json"
                 ],
@@ -367,6 +416,14 @@ const docTemplate = `{
                     "Workouts"
                 ],
                 "summary": "Query Workouts.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Filter by user Id",
+                        "name": "userId",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -752,6 +809,46 @@ const docTemplate = `{
                 }
             }
         },
+        "models.WorkoutLog": {
+            "type": "object",
+            "properties": {
+                "duration": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "performedAt": {
+                    "type": "string"
+                },
+                "relationships": {
+                    "$ref": "#/definitions/models.WorkoutLogRelations"
+                },
+                "totalVolume": {
+                    "type": "string"
+                },
+                "userId": {
+                    "type": "string"
+                },
+                "workoutId": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.WorkoutLogRelations": {
+            "type": "object",
+            "properties": {
+                "user": {
+                    "$ref": "#/definitions/models.Users"
+                },
+                "workout": {
+                    "$ref": "#/definitions/models.Workouts"
+                }
+            }
+        },
         "models.Workouts": {
             "type": "object",
             "properties": {
@@ -791,7 +888,7 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "1.3",
+	Version:          "1.5",
 	Host:             "",
 	BasePath:         "/api",
 	Schemes:          []string{},
