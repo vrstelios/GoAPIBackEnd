@@ -13,9 +13,6 @@ import (
 var WorkoutLogType = graphql.NewObject(graphql.ObjectConfig{
 	Name: "WorkoutLog",
 	Fields: graphql.Fields{
-		"id": &graphql.Field{
-			Type: graphql.String,
-		},
 		"userId": &graphql.Field{
 			Type: graphql.String,
 		},
