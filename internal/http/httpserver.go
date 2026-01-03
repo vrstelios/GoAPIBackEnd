@@ -51,16 +51,14 @@ func SetupRoutes(router *gin.Engine) {
 		// Workout endpoints
 		routerEndpoints.POST("/workouts", api.PostWorkout)
 		routerEndpoints.GET("/workouts/:id", api.GetWorkout)
-		//routerEndpoints.GET("/workouts", api.QueryWorkouts)
 		routerEndpoints.PUT("/workouts/:id", api.PutWorkout)
 		routerEndpoints.DELETE("/workouts/:id", api.DelWorkout)
 		routerEndpoints.POST("/workouts/query", api.QueryWorkoutsV2)
+		//routerEndpoints.GET("/workouts", api.QueryWorkouts)
+		// Routing&Channel
+		routerEndpoints.POST("/load/workouts", api.LoadExcels)
 
 		// WorkoutLog endpoints
 		//routerEndpoints.POST("/workoutLogs", api.PostWorkoutLogs)
-
-		// Routing&Channel
-		//routerEndpoints.POST("/download/images", DownloadUrls) xlsx
-		//routerEndpoints.POST("/tasks/query", QueryTasksV2)*/
 	}
 }

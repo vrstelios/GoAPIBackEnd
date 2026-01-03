@@ -1,5 +1,12 @@
 basePath: /api
 definitions:
+  misc.LoadFiles:
+    properties:
+      workouts:
+        items:
+          type: string
+        type: array
+    type: object
   misc.QueryPagingRequest:
     properties:
       page:
@@ -65,6 +72,18 @@ definitions:
         type: string
       name:
         type: string
+    type: object
+  models.LoadWorkouts:
+    properties:
+      error: {}
+      excel:
+        type: string
+      failed:
+        type: integer
+      inserted:
+        type: integer
+      success:
+        type: boolean
     type: object
   models.Users:
     properties:
@@ -144,7 +163,7 @@ info:
     url: https://github.com/vrstelios/GoAPIBackEnd
   description: A Tag service API in Go using Gin framework
   title: EndPoints
-  version: "1.5"
+  version: "1.7"
 paths:
   /Coach/{name}:
     get:
@@ -367,6 +386,37 @@ paths:
       summary: Get Exercise.
       tags:
       - Exercise
+  /load/workouts:
+    post:
+      parameters:
+      - description: Load Files
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/misc.LoadFiles'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.LoadWorkouts'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.APIError'
+        "408":
+          description: Request Timeout
+          schema:
+            $ref: '#/definitions/models.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.APIError'
+      summary: Load Workouts
+      tags:
+      - Workouts
   /workoutLogs:
     post:
       parameters:

@@ -6,12 +6,21 @@ import (
 	"GoAPIBackEnd/internal/type/misc"
 	"GoAPIBackEnd/internal/type/models"
 	"context"
+	"encoding/csv"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"math"
 	"net/http"
+	"os"
+	"strings"
+	"sync"
+	"time"
 )
+
+var dbMutex sync.Mutex
+
+const pathCSV = "C:\\Users\\User\\GolandProjects\\GoAPIBackEnd\\excel\\"
 
 // @Summary Create Workout.
 // @Tags Workouts
@@ -241,4 +250,112 @@ func QueryWorkoutsV2(ctx *gin.Context) {
 		Workouts:     filtered,
 	}
 	apperrors.GetAPIError(ctx, response, http.StatusOK, nil)
+}
+
+// @Summary	Load Workouts
+// @Tags		Workouts
+// @Produce	json
+// @Param		request	body		misc.LoadFiles	true	"Load Files"
+// @Success	200		{object}	models.LoadWorkouts
+// @Failure	400		{object}	models.APIError
+// @Failure	408     {object}	models.APIError
+// @Failure	500		{object}	models.APIError
+// @Router		/load/workouts [post]
+func LoadExcels(ctx *gin.Context) {
+	files := misc.LoadFiles{}
+	err := ctx.ShouldBindJSON(&files)
+	if err != nil {
+		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusBadRequest, "INVALID_REQUEST", err))
+		return
+	}
+
+	resultCh := make(chan models.LoadWorkouts, len(files.Workouts))
+	var wg sync.WaitGroup
+
+	for _, fileName := range files.Workouts {
+		wg.Add(1)
+		go func(fname string) {
+			defer wg.Done()
+			resultCh <- loadCSVFile(fname)
+		}(fileName)
+	}
+
+	go func() {
+		wg.Wait()
+		close(resultCh)
+	}()
+
+	results := make([]models.LoadWorkouts, 0, len(files.Workouts))
+	timeout := time.After(30 * time.Second)
+
+	for {
+		select {
+		case res, ok := <-resultCh:
+			if !ok {
+				apperrors.GetAPIError(ctx, gin.H{"results": results}, http.StatusOK, nil)
+				return
+			}
+			results = append(results, res)
+
+		case <-timeout:
+			ctx.JSON(http.StatusRequestTimeout, gin.H{
+				"error":   "Timeout waiting for load",
+				"results": results,
+			})
+			return
+		}
+	}
+
+	apperrors.GetAPIError(ctx, gin.H{"results": results}, http.StatusOK, nil)
+}
+
+func loadCSVFile(fileName string) models.LoadWorkouts {
+	path := pathCSV + fileName
+	file, err := os.Open(path)
+	if err != nil {
+		return models.LoadWorkouts{Excel: fileName, Success: false, Error: err}
+	}
+	defer file.Close()
+
+	reader := csv.NewReader(file)
+	reader.Read() // Skip header
+	records, err := reader.ReadAll()
+	if err != nil {
+		return models.LoadWorkouts{Excel: fileName, Success: false, Error: err}
+	}
+
+	dbConn := database.Conn
+
+	inserted := 0
+	failed := 0
+
+	for _, record := range records {
+		notes := record[3]
+		workout := models.Workouts{
+			Id:        uuid.NewString(),
+			UserId:    strings.TrimSpace(record[1]),
+			Name:      strings.TrimSpace(record[2]),
+			Notes:     &notes,
+			CreatedAt: time.Now(),
+		}
+
+		dbMutex.Lock()
+		err := database.PostWorkout(dbConn, workout)
+		dbMutex.Unlock()
+
+		if err != nil {
+			fmt.Printf("FAILED: %v\n", err)
+			failed++
+		} else {
+			inserted++
+		}
+	}
+
+	return models.LoadWorkouts{
+		Excel:    fileName,
+		Success:  failed == 0,
+		Inserted: inserted,
+		Failed:   failed,
+		Error:    nil,
+	}
 }

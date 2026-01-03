@@ -2,6 +2,8 @@
 
 A RESTful API service built with Go and Gin framework, featuring JWT authentication, GraphQL support, and Swagger documentation.
 
+> Project Inspiration: This project is based on the Fitness Workout Tracker project idea from roadmap.sh
+
 ![DiagramDataBase.png](DiagramDataBase.png)
 
 ## Project Structure
@@ -19,7 +21,8 @@ A RESTful API service built with Go and Gin framework, featuring JWT authenticat
 ├── docs/                        # Swagger documentation
 │   ├── docs.go                
 │   ├── swagger.json   
-│   └── swagger.yaml         
+│   └── swagger.yaml   
+├── excel/                       # Include all csv files      
 ├── internal/
 │   ├── api/                     # HTTP handlers
 │   │   ├──  api.go
@@ -59,16 +62,16 @@ A RESTful API service built with Go and Gin framework, featuring JWT authenticat
 
 ## Features
 
-- RESTful API with Gin framework
-- Swagger/OpenAPI documentation
 - JWT-based authentication
-- Connect with database
 - Role-based access control (admin/user)
-- GraphQL endpoint with GraphiQL interface
-- Test Routes API
+- Connect with database
 - Task management CRUD operations
+- RESTful API with Gin framework
+- GraphQL endpoint with GraphiQL interface
 - Server-side filtering and pagination
-- Image download functionality
+- Test Routes API
+- Load csv files functionality(with go routing)
+- Swagger/OpenAPI documentation
 
 ## Prerequisites
 
@@ -125,12 +128,10 @@ Then access Swagger UI at: `http://localhost:8080/swagger/index.html`
 - `PUT /api/workouts/:id` - Update Workout
 - `DELETE /api/workouts/:id` - Delete Workout
 - `POST /api/workouts/query` - Query Workouts (server side filtering & paging)
+- `POST /api/load/workouts` - load data from csv files foe workouts
 
 ### GraphQL
 - `POST /api/graphql/workouts/logs` - GraphQL endpoint (with GraphiQL interface)
-
-### Other
-- `POST /api/download/images` - Download images from URLs
 
 ## Testing
 - `POST /api/auth/signup` - Signup a new user
@@ -145,4 +146,3 @@ make test
 # Run tests with coverage
 make TestRoutes
 ```
-## Idea for https://roadmap.sh/projects/fitness-workout-tracker

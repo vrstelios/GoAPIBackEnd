@@ -18,3 +18,7 @@ type QueryPagingRequest struct {
 	PageSize int `json:"pageSize" binding:"gt=0"`
 	Page     int `json:"page" binding:"gte=0"`
 }
+
+type LoadFiles struct {
+	Workouts []string `json:"workouts"`
+}

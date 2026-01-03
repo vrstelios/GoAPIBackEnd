@@ -11,8 +11,7 @@ import (
 
 /*
 Create a GraphQL Object type called WorkoutLogType that retrieves all workouts
-
-	for a specific userId and creates workout logs associated with that userId.
+for a specific userId and creates workout logs associated with that userId.
 */
 var WorkoutLogType = graphql.NewObject(graphql.ObjectConfig{
 	Name: "WorkoutLog",

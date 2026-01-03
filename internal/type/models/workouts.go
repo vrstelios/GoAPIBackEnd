@@ -48,3 +48,11 @@ type WorkoutLogRelations struct {
 	Workout *Workouts `json:"workout"`
 	User    *Users    `json:"user"`
 }
+
+type LoadWorkouts struct {
+	Excel    string `json:"excel"`
+	Success  bool   `json:"success"`
+	Inserted int    `json:"inserted"`
+	Failed   int    `json:"failed"`
+	Error    error  `json:"error"`
+}

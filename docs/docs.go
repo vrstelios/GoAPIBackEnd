@@ -358,6 +358,54 @@ const docTemplate = `{
                 }
             }
         },
+        "/load/workouts": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Workouts"
+                ],
+                "summary": "Load Workouts",
+                "parameters": [
+                    {
+                        "description": "Load Files",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/misc.LoadFiles"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.LoadWorkouts"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.APIError"
+                        }
+                    },
+                    "408": {
+                        "description": "Request Timeout",
+                        "schema": {
+                            "$ref": "#/definitions/models.APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.APIError"
+                        }
+                    }
+                }
+            }
+        },
         "/workoutLogs": {
             "post": {
                 "produces": [
@@ -671,6 +719,17 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "misc.LoadFiles": {
+            "type": "object",
+            "properties": {
+                "workouts": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "misc.QueryPagingRequest": {
             "type": "object",
             "properties": {
@@ -769,6 +828,24 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                }
+            }
+        },
+        "models.LoadWorkouts": {
+            "type": "object",
+            "properties": {
+                "error": {},
+                "excel": {
+                    "type": "string"
+                },
+                "failed": {
+                    "type": "integer"
+                },
+                "inserted": {
+                    "type": "integer"
+                },
+                "success": {
+                    "type": "boolean"
                 }
             }
         },
@@ -888,7 +965,7 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "1.5",
+	Version:          "1.7",
 	Host:             "",
 	BasePath:         "/api",
 	Schemes:          []string{},
