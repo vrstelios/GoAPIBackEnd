@@ -2,7 +2,7 @@
 
 A RESTful API service built with Go and Gin framework, featuring JWT authentication, GraphQL support, and Swagger documentation.
 
-> Project Inspiration: This project is based on the Fitness Workout Tracker project idea from roadmap.sh
+> Project Inspiration: This project is based on the Fitness [Workout Tracker](https://roadmap.sh/projects/fitness-workout-tracker) project idea from roadmap.sh
 
 ![DiagramDataBase.png](DiagramDataBase.png)
 
