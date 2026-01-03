@@ -9,7 +9,7 @@ import (
 )
 
 // @title 		  EndPoints
-// @version		  1.5
+// @version		  1.7
 // @description   A Tag service API in Go using Gin framework
 // @contact.name  DoctorVeRossi
 // @contact.url   https://github.com/vrstelios/GoAPIBackEnd

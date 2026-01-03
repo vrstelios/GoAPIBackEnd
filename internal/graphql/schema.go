@@ -9,7 +9,11 @@ import (
 	"github.com/graphql-go/graphql"
 )
 
-// Create GraphQL Object type with name WorkoutLogType
+/*
+Create a GraphQL Object type called WorkoutLogType that retrieves all workouts
+
+	for a specific userId and creates workout logs associated with that userId.
+*/
 var WorkoutLogType = graphql.NewObject(graphql.ObjectConfig{
 	Name: "WorkoutLog",
 	Fields: graphql.Fields{

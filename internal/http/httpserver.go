@@ -30,7 +30,7 @@ func SetupRoutes(router *gin.Engine) {
 
 	// GraphQL endpoint
 	// Found workouts with userId and created logs
-	//Συνδυάζεις API Gateway, joins, filters, pagination, ακόμα και πολύπλοκα reports, σε ένα query
+	// Combine API Gateway, joins, filters, pagination, still and complex reports, in any query
 	routerEndpoints.POST("/graphql/workouts/logs", func(ctx *gin.Context) {
 		graphqlHandler.ServeHTTP(ctx.Writer, ctx.Request)
 	})
@@ -59,6 +59,7 @@ func SetupRoutes(router *gin.Engine) {
 		// WorkoutLog endpoints
 		//routerEndpoints.POST("/workoutLogs", api.PostWorkoutLogs)
 
+		// Routing&Channel
 		//routerEndpoints.POST("/download/images", DownloadUrls) xlsx
 		//routerEndpoints.POST("/tasks/query", QueryTasksV2)*/
 	}
