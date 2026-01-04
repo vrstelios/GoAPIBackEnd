@@ -5,16 +5,41 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
 type Config struct {
-	Port            string
+	Server          ServerConfig
+	Database        DatabaseConfig
+	JWT             JWTConfig
+	API             APIConfig
+	TokenExpiration time.Duration
+}
+
+type ServerConfig struct {
+	Port string
+	Host string
+	Env  string
+}
+
+type DatabaseConfig struct {
+	//URL          string // Κρατάς την παλιά μορφή για συμβατότητα
+	Host     string
+	Port     string
+	User     string
+	Password string
+	Name     string
+	SSLMode  string
+}
+
+type JWTConfig struct {
 	JWTSecret       string
 	ExpirationHours int
-	DatabaseURL     string
-	APIBaseURL      string
-	TokenExpiration time.Duration
+}
+
+type APIConfig struct {
+	BaseURL string
 }
 
 var AppConfig *Config
@@ -25,14 +50,57 @@ func init() {
 	}
 
 	AppConfig = &Config{
-		Port:            getEnv("PORT", ":8080"),
-		JWTSecret:       getEnv("JWT_SECRET", "default-secret-key"),
-		ExpirationHours: getEnvAsInt("EXPIRATION_HOURS", 2),
-		DatabaseURL:     getEnv("DB", "host=localhost user=postgres password=postgres port=5432 sslmode=disable"),
-		APIBaseURL:      getEnv("APIBaseURL", "http://localhost:8080/api/"),
+		Server: ServerConfig{
+			Port: getEnv("PORT", ":8080"),
+			Host: getEnv("HOST", "localhost"),
+		},
+		Database: parseDatabaseConfig(),
+		JWT: JWTConfig{
+			JWTSecret:       getEnv("JWT_SECRET", "default-secret-key-change-in-production"),
+			ExpirationHours: getEnvAsInt("EXPIRATION_HOURS", 2),
+		},
+		API: APIConfig{
+			BaseURL: getEnv("API_BASE_URL", "http://localhost:8080/api/"),
+		},
 	}
 
-	AppConfig.TokenExpiration = time.Duration(AppConfig.ExpirationHours) * time.Hour
+	log.Printf("Configuration loaded for environment: %s", AppConfig.Server.Env)
+}
+
+func parseDatabaseConfig() DatabaseConfig {
+	dbURL := getEnv("DB", "host=localhost user=postgres password=postgres port=5432 sslmode=disable")
+
+	params := parseConnectionString(dbURL)
+
+	return DatabaseConfig{
+		Host:     getParam(params, "host", "localhost"),
+		Port:     getParam(params, "port", "5432"),
+		User:     getParam(params, "user", "postgres"),
+		Password: getParam(params, "password", "postgres"),
+		Name:     getParam(params, "dbname", ""),
+		SSLMode:  getParam(params, "sslmode", "disable"),
+	}
+}
+
+func parseConnectionString(connStr string) map[string]string {
+	params := make(map[string]string)
+
+	pairs := strings.Fields(connStr)
+	for _, pair := range pairs {
+		kv := strings.SplitN(pair, "=", 2)
+		if len(kv) == 2 {
+			params[kv[0]] = kv[1]
+		}
+	}
+
+	return params
+}
+
+func getParam(params map[string]string, key, defaultValue string) string {
+	if value, ok := params[key]; ok {
+		return value
+	}
+	return defaultValue
 }
 
 func Get() *Config {
@@ -57,19 +125,5 @@ func getEnvAsInt(key string, defaultValue int) int {
 	}
 
 	log.Printf("Invalid integer value for %s: %s, using default: %d", key, strValue, defaultValue)
-	return defaultValue
-}
-
-func getEnvAsBool(key string, defaultValue bool) bool {
-	strValue := getEnv(key, "")
-	if strValue == "" {
-		return defaultValue
-	}
-
-	if boolValue, err := strconv.ParseBool(strValue); err == nil {
-		return boolValue
-	}
-
-	log.Printf("Invalid boolean value for %s: %s, using default: %v", key, strValue, defaultValue)
 	return defaultValue
 }

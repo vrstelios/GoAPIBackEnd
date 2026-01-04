@@ -83,5 +83,5 @@ func RoleMiddleware(allowedRoles ...string) gin.HandlerFunc {
 }
 
 func init() {
-	JwtSecret = []byte(config.Get().JWTSecret)
+	JwtSecret = []byte(config.Get().JWT.JWTSecret)
 }
