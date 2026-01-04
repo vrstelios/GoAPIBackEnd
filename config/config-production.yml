@@ -1,0 +1,17 @@
+server:
+  host:
+  port:
+
+api:
+  baseURL: "http://.../api/"
+
+database:
+  host:
+  port:
+  user:
+  password:
+  name:
+  sslmode:
+
+jwt:
+  expirationHours:
