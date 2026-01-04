@@ -1,0 +1,17 @@
+server:
+  host: localhost
+  port: ":8080"
+
+api:
+  baseURL: "http://localhost:8080/api/"
+
+database:
+  host: localhost
+  port: 5432
+  user: postgres
+  password: postgres
+  name: postgres
+  sslmode: disable
+
+jwt:
+  expirationHours: 2

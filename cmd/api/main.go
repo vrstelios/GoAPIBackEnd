@@ -1,11 +1,11 @@
 package main
 
 import (
+	"GoAPIBackEnd/config"
 	"GoAPIBackEnd/internal"
 	"GoAPIBackEnd/internal/api"
 	"GoAPIBackEnd/internal/database"
 	"fmt"
-	"os"
 )
 
 // @title 		  EndPoints
@@ -24,7 +24,7 @@ func main() {
 	 \ \_____\  \ \_____\  -   \ \_\ \_\  \ \_\    \ \_\
 	  \/_____/   \/_____/       \/_/\/_/   \/_/     \/_/ `)
 
-	srv.Run(os.Getenv("PORT"))
+	srv.Run(config.GetConfig().Server.Port)
 }
 
 func init() {

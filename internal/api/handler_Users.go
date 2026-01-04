@@ -1,6 +1,7 @@
 package api
 
 import (
+	"GoAPIBackEnd/config"
 	"GoAPIBackEnd/internal/apperrors"
 	"GoAPIBackEnd/internal/auth"
 	"GoAPIBackEnd/internal/database"
@@ -13,8 +14,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 	"net/http"
-	"os"
-	"strconv"
 	"time"
 )
 
@@ -40,7 +39,7 @@ func Signup(ctx *gin.Context) {
 	}
 
 	if len(userBody.Role) == 0 {
-		userBody.Role = "athlete"
+		userBody.Role = "user"
 	}
 
 	if len(userBody.Name) == 0 && len(userBody.Email) == 0 {
@@ -120,7 +119,7 @@ func Login(ctx *gin.Context) {
 	}
 
 	// Generate a jwt token
-	expHours, err := strconv.Atoi(os.Getenv("EXPIRATION_HOURS"))
+	expHours := config.GetConfig().JWT.ExpirationHours
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"username": userPayload.Name,
 		"role":     user[0].Role,

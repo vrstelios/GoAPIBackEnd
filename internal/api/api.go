@@ -10,7 +10,7 @@ var (
 )
 
 func Init() {
-	DefaultClient = NewAPIClient(config.Get().API.BaseURL)
+	DefaultClient = NewAPIClient(config.GetConfig().API.BaseURL)
 }
 
 func ClientQueryWorkouts(userID string) ([]models.Workouts, error) {
