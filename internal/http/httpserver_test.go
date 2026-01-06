@@ -2,7 +2,7 @@ package http
 
 import (
 	"GoAPIBackEnd/internal/api"
-	"GoAPIBackEnd/internal/database"
+	"GoAPIBackEnd/internal/config"
 	"bytes"
 	"context"
 	"github.com/gin-gonic/gin"
@@ -23,7 +23,7 @@ func TestRoutes(t *testing.T) {
 			t.Fatalf("Failed to connect to database: %v", err)
 		}
 		defer conn.Close(context.Background())
-		database.Conn = conn
+		config.Conn = conn
 
 		signupUser := map[string]string{
 			"name":     "testUser",
@@ -76,7 +76,7 @@ func TestRoutes(t *testing.T) {
 			t.Fatalf("Failed to connect to database: %v", err)
 		}
 		defer conn.Close(context.Background())
-		database.Conn = conn
+		config.Conn = conn
 
 		signupUser := map[string]string{
 			"name":     "testAdmin",

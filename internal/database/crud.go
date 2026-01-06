@@ -10,13 +10,13 @@ import (
 	"strings"
 )
 
-func GetUser(conn *pgx.Conn, id string, name string) ([]*models.Users, error) {
+func GetUser(conn *pgx.Conn, id string, name string, email string) ([]*models.Users, error) {
 	var results = make([]*models.Users, 0)
 	var r pgx.Rows
 	var err error
 	var masterSql string
 
-	masterSql = `SELECT id, name, password, email, role, coach_id, created_at FROM users`
+	masterSql = `SELECT id, name, password, email, role, coach_id, token, refresh_token, created_at FROM users`
 	var counter int = 0
 	var params []interface{}
 	if len(id) > 0 {
@@ -29,6 +29,11 @@ func GetUser(conn *pgx.Conn, id string, name string) ([]*models.Users, error) {
 		params = append(params, name)
 		masterSql = masterSql + fmt.Sprintf(" and name = $%d", counter)
 	}
+	if len(email) > 0 {
+		counter++
+		params = append(params, email)
+		masterSql = masterSql + fmt.Sprintf(" and email = $%d", counter)
+	}
 	masterSql = strings.Replace(masterSql, " and ", " where ", 1)
 
 	r, err = conn.Query(context.Background(), masterSql, params...)
@@ -37,7 +42,7 @@ func GetUser(conn *pgx.Conn, id string, name string) ([]*models.Users, error) {
 	}
 	for r.Next() {
 		e := &models.Users{}
-		err = r.Scan(&e.Id, &e.Name, &e.Password, &e.Email, &e.Role, &e.CoachId, &e.CreatedAt)
+		err = r.Scan(&e.Id, &e.Name, &e.Password, &e.Email, &e.Role, &e.CoachId, &e.Token, &e.RefreshToken, &e.CreatedAt)
 		if err != nil {
 			return results, err
 		}
@@ -48,9 +53,18 @@ func GetUser(conn *pgx.Conn, id string, name string) ([]*models.Users, error) {
 	return results, nil
 }
 
+func PutUser(conn *pgx.Conn, user models.Users) error {
+	query := `UPDATE users SET  name = $1, password = $2, email = $3, role = $4, coach_id = $5, token = $6, refresh_token = $7  WHERE id = $9`
+	_, err := conn.Exec(context.Background(), query, user.Name, user.Password, user.Email, user.Role, user.CoachId, user.Token, user.RefreshToken, user.Id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func PostUser(conn *pgx.Conn, user models.Users) error {
-	masterSql := `INSERT INTO users (id, name, password, email, role) VALUES ($1, $2, $3, $4, $5)`
-	_, err := conn.Exec(context.Background(), masterSql, user.Id, user.Name, user.Password, user.Email, user.Role)
+	masterSql := `INSERT INTO users (id, name, password, email, role, coach_id, token, refresh_token) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
+	_, err := conn.Exec(context.Background(), masterSql, user.Id, user.Name, user.Password, user.Email, user.Role, user.CoachId, user.Token, user.RefreshToken)
 	if err != nil {
 		return err
 	}
@@ -147,7 +161,7 @@ func GetCoach(conn *pgx.Conn, name string, addRelations bool) ([]*models.Coach, 
 	if addRelations {
 		for i := range results {
 			relations := models.CoachRelations{}
-			user, err := GetUser(conn, results[i].UserId, "") // Αλλαγή εδώ
+			user, err := GetUser(conn, results[i].UserId, "", "")
 			if err != nil {
 				return nil, err
 			}
@@ -232,7 +246,7 @@ func GetWorkout(conn *pgx.Conn, id string, name string, userId string, addRelati
 	if addRelations {
 		for i := range results {
 			relations := models.WorkoutsRelations{}
-			user, err := GetUser(conn, results[i].UserId, "") // Αλλαγή εδώ
+			user, err := GetUser(conn, results[i].UserId, "", "")
 			if err != nil {
 				return nil, err
 			}

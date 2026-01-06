@@ -3,8 +3,8 @@ package http
 import (
 	_ "GoAPIBackEnd/docs"
 	"GoAPIBackEnd/internal/api"
-	"GoAPIBackEnd/internal/auth"
 	"GoAPIBackEnd/internal/graphql"
+	"GoAPIBackEnd/internal/middleware"
 	"github.com/gin-gonic/gin"
 	"github.com/graphql-go/handler"
 	"github.com/swaggo/files"
@@ -37,16 +37,16 @@ func SetupRoutes(router *gin.Engine) {
 	routerEndpoints.POST("/workoutLogs", api.PostWorkoutLogs)
 	routerEndpoints.GET("/workouts", api.QueryWorkouts)
 
-	routerEndpoints.Use(auth.AuthJWTMiddleware())
+	routerEndpoints.Use(middleware.Authenticate())
 	{
 		// Exercises endpoints
 		routerEndpoints.GET("/exercises", api.QueryExercises)
 		routerEndpoints.GET("/exercises/:id", api.GetExercise)
-		routerEndpoints.POST("/exercises", auth.RoleMiddleware("admin"), api.PostExercise)
+		routerEndpoints.POST("/exercises", middleware.RoleMiddleware("admin"), api.PostExercise)
 
 		// Coach endpoints
-		routerEndpoints.GET("/coach/:name", auth.RoleMiddleware("admin"), api.GetCoach)
-		routerEndpoints.POST("/coach", auth.RoleMiddleware("admin"), api.PostCoach)
+		routerEndpoints.GET("/coach/:name", middleware.RoleMiddleware("admin"), api.GetCoach)
+		routerEndpoints.POST("/coach", middleware.RoleMiddleware("admin"), api.PostCoach)
 
 		// Workout endpoints
 		routerEndpoints.POST("/workouts", api.PostWorkout)

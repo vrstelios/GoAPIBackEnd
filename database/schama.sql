@@ -1,11 +1,13 @@
 CREATE TABLE users (
-    id          UUID PRIMARY KEY,
-    name        TEXT NOT NULL,
-    password    TEXT NOT NULL,
-    email       TEXT NOT NULL,
-    role        TEXT NOT NULL DEFAULT 'athlete',
-    coach_id    UUID NOT NULL,
-    created_at  TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    id              UUID PRIMARY KEY,
+    name            TEXT NOT NULL,
+    password        TEXT NOT NULL,
+    email           TEXT NOT NULL,
+    role            TEXT NOT NULL DEFAULT 'user',
+    coach_id        UUID NOT NULL,
+    token           TEXT,
+    refresh_token   TEXT,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (coach_id) REFERENCES coach(id) ON DELETE SET NULL);
 
 CREATE TABLE coach (

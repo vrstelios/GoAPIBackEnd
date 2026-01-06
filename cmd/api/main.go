@@ -4,7 +4,7 @@ import (
 	"GoAPIBackEnd/config"
 	"GoAPIBackEnd/internal"
 	"GoAPIBackEnd/internal/api"
-	"GoAPIBackEnd/internal/database"
+	config2 "GoAPIBackEnd/internal/config"
 	"fmt"
 )
 
@@ -28,6 +28,6 @@ func main() {
 }
 
 func init() {
-	database.InitDatabase()
+	config2.InitDatabase()
 	api.Init()
 }

@@ -13,11 +13,11 @@ func Init() {
 	DefaultClient = NewAPIClient(config.GetConfig().API.BaseURL)
 }
 
-func ClientQueryWorkouts(userID string) ([]models.Workouts, error) {
+func ClientQueryWorkouts(userId string) ([]models.Workouts, error) {
 	if DefaultClient == nil {
 		Init()
 	}
-	return DefaultClient.QueryWorkouts(userID)
+	return DefaultClient.QueryWorkouts(userId)
 }
 
 func ClientCreateWorkoutLogs(logs []models.WorkoutLog) ([]models.WorkoutLog, error) {

@@ -3,19 +3,21 @@ package api
 import (
 	"GoAPIBackEnd/config"
 	"GoAPIBackEnd/internal/apperrors"
-	"GoAPIBackEnd/internal/auth"
+	config2 "GoAPIBackEnd/internal/config"
 	"GoAPIBackEnd/internal/database"
+	"GoAPIBackEnd/internal/helpers"
 	"GoAPIBackEnd/internal/type/models"
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
+	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
-	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 	"net/http"
-	"time"
+	"strings"
 )
+
+var validate = validator.New()
 
 // @Summary Signup a new user.
 // @Description Creates a new user account with username and password
@@ -29,9 +31,10 @@ import (
 // @Failure 500 {object} models.APIError
 // @Router /auth/signup [post]
 func Signup(ctx *gin.Context) {
-	var dbConn = database.Conn
+	var dbConn = config2.Conn
 
 	userBody := models.Users{}
+	// Get user input
 	err := ctx.ShouldBindJSON(&userBody)
 	if err != nil {
 		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusBadRequest, "INVALID_REQUEST", err))
@@ -51,7 +54,20 @@ func Signup(ctx *gin.Context) {
 		return
 	}
 
-	user, err := database.GetUser(dbConn, "", userBody.Name)
+	// validate user inp
+	if validationErr := validate.Struct(userBody); validationErr != nil {
+		var errorMessages []string
+		var validationErrors validator.ValidationErrors
+		if errors.As(validationErr, &validationErrors) {
+			for _, err := range validationErrors {
+				errorMessages = append(errorMessages, fmt.Sprintf("Field '%s' failed validation: %s", err.Field(), err.Tag()))
+			}
+		}
+		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusBadRequest, "VALIDATION_ERROR", fmt.Errorf(strings.Join(errorMessages, "; "))))
+		return
+	}
+
+	user, err := database.GetUser(dbConn, "", userBody.Name, "")
 	if err != nil {
 		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusInternalServerError, "DB_ERROR", err))
 		return
@@ -61,18 +77,16 @@ func Signup(ctx *gin.Context) {
 		return
 	}
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(userBody.Password), 10)
-	if err != nil {
-		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusInternalServerError, "HASH_ERROR", err))
-		return
-	}
-
+	accessToke, refreshToken := helpers.GenerateToken(userBody.Email, userBody.Id, userBody.Role)
 	nUser := models.Users{
-		Id:       uuid.New().String(),
-		Name:     userBody.Name,
-		Password: string(hashedPassword),
-		Email:    userBody.Email,
-		Role:     userBody.Role,
+		Id:           uuid.New().String(),
+		Name:         userBody.Name,
+		Password:     *helpers.HashPassword(userBody.Password),
+		Email:        userBody.Email,
+		Role:         userBody.Role,
+		CoachId:      nil,
+		Token:        &accessToke,
+		RefreshToken: &refreshToken,
 	}
 
 	err = database.PostUser(dbConn, nUser)
@@ -94,7 +108,7 @@ func Signup(ctx *gin.Context) {
 // @Failure 500 {object} models.APIError
 // @Router /auth/login [post]
 func Login(ctx *gin.Context) {
-	var dbConn = database.Conn
+	var dbConn = config2.Conn
 
 	userPayload := models.Users{}
 	if err := ctx.ShouldBindJSON(&userPayload); err != nil {
@@ -102,7 +116,7 @@ func Login(ctx *gin.Context) {
 		return
 	}
 
-	user, err := database.GetUser(dbConn, "", userPayload.Name)
+	user, err := database.GetUser(dbConn, "", userPayload.Name, userPayload.Email)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusUnauthorized, "INVALID_CREDENTIALS", fmt.Errorf("Invalid username or password")))
 		return
@@ -112,29 +126,19 @@ func Login(ctx *gin.Context) {
 		return
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(user[0].Password), []byte(userPayload.Password))
-	if err != nil {
-		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusUnauthorized, "INVALID_CREDENTIALS", fmt.Errorf("Invalid username or password")))
+	passwordIsValid, msg := helpers.VerifyPassword(user[0].Password, userPayload.Password)
+	if !passwordIsValid {
+		apperrors.GetAPIError(ctx, gin.H{"error": msg}, 0, apperrors.APIError{}.New(http.StatusUnauthorized, "INVALID_CREDENTIALS", fmt.Errorf("Invalid username or password")))
 		return
 	}
 
-	// Generate a jwt token
+	token, refreshToken := helpers.GenerateToken(user[0].Email, user[0].Id, user[0].Role)
+	helpers.UpdatedAllToken(token, refreshToken, user[0].Id)
 	expHours := config.GetConfig().JWT.ExpirationHours
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"username": userPayload.Name,
-		"role":     user[0].Role,
-		"exp":      time.Now().Add(time.Duration(expHours) * time.Hour).Unix(),
-	})
-
-	tokenString, err := token.SignedString(auth.JwtSecret)
-	if err != nil {
-		apperrors.GetAPIError(ctx, nil, 0, apperrors.APIError{}.New(http.StatusInternalServerError, "TOKEN_GENERATION_ERROR", fmt.Errorf("Failed to generate token: %v", err)))
-		return
-	}
 
 	// Send it back
 	ctx.SetSameSite(http.SameSiteLaxMode)
-	ctx.SetCookie("Authorization", tokenString, expHours*3600, "/", "", false, true)
+	ctx.SetCookie("Authorization", token, expHours*3600, "/", "", false, true)
 
 	apperrors.GetAPIError(ctx, gin.H{}, http.StatusOK, nil)
 }

@@ -4,6 +4,7 @@ go 1.24.7
 
 require (
 	github.com/bytedance/gopkg v0.1.3
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/gin v1.11.0
 	github.com/goccy/go-json v0.10.2
 	github.com/golang-jwt/jwt/v5 v5.3.0

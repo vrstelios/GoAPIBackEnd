@@ -1,6 +1,8 @@
 package internal
 
 import (
+	"GoAPIBackEnd/internal/config"
+	"GoAPIBackEnd/internal/helpers"
 	"GoAPIBackEnd/internal/http"
 	"github.com/gin-gonic/gin"
 )
@@ -10,6 +12,8 @@ type Server struct {
 }
 
 func New() *Server {
+	key := config.GenerateRandomKey()
+	helpers.SetJWTKey(key)
 	router := gin.Default()
 
 	srv := &Server{

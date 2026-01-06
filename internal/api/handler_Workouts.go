@@ -2,6 +2,7 @@ package api
 
 import (
 	"GoAPIBackEnd/internal/apperrors"
+	"GoAPIBackEnd/internal/config"
 	"GoAPIBackEnd/internal/database"
 	"GoAPIBackEnd/internal/type/misc"
 	"GoAPIBackEnd/internal/type/models"
@@ -32,7 +33,7 @@ const pathCSV = "C:\\Users\\User\\GolandProjects\\GoAPIBackEnd\\excel\\"
 // @Failure 500 {object} models.APIError
 // @Router /workouts [post]
 func PostWorkout(ctx *gin.Context) {
-	var dbConn = database.Conn
+	var dbConn = config.Conn
 	workout := models.Workouts{}
 	err := ctx.ShouldBindJSON(&workout)
 	if err != nil {
@@ -77,7 +78,7 @@ func PostWorkout(ctx *gin.Context) {
 // @Failure 500 {object} models.APIError
 // @Router /workouts/{id} [get]
 func GetWorkout(ctx *gin.Context) {
-	var dbConn = database.Conn
+	var dbConn = config.Conn
 	id := ctx.Param("id")
 
 	workout, err := database.GetWorkout(dbConn, id, "", "", true)
@@ -103,7 +104,7 @@ func GetWorkout(ctx *gin.Context) {
 // @Failure	500		{object}	models.APIError
 // @Router		/workouts [get]
 func QueryWorkouts(ctx *gin.Context) {
-	var dbConn = database.Conn
+	var dbConn = config.Conn
 
 	// Get all query parameters
 	userId := ctx.Query("userId")
@@ -132,7 +133,7 @@ func QueryWorkouts(ctx *gin.Context) {
 // @Failure 500 {object} models.APIError
 // @Router /workouts/{id} [put]
 func PutWorkout(ctx *gin.Context) {
-	var dbConn = database.Conn
+	var dbConn = config.Conn
 	workout := models.Workouts{}
 	err := ctx.ShouldBindJSON(&workout)
 	if err != nil {
@@ -175,7 +176,7 @@ func PutWorkout(ctx *gin.Context) {
 // @Failure 500 {object} models.APIError
 // @Router /workouts/{id} [delete]
 func DelWorkout(ctx *gin.Context) {
-	var dbConn = database.Conn
+	var dbConn = config.Conn
 	id := ctx.Param("id")
 
 	err := database.DelWorkout(dbConn, id)
@@ -196,7 +197,7 @@ func DelWorkout(ctx *gin.Context) {
 // @Failure	500		{object}	models.APIError
 // @Router		/workouts/query [post]
 func QueryWorkoutsV2(ctx *gin.Context) {
-	var dbConn = database.Conn
+	var dbConn = config.Conn
 	queryRequest := misc.QueryWorkoutsRequest{}
 	err := ctx.ShouldBindJSON(&queryRequest)
 	if err != nil {
@@ -324,7 +325,7 @@ func loadCSVFile(fileName string) models.LoadWorkouts {
 		return models.LoadWorkouts{Excel: fileName, Success: false, Error: err}
 	}
 
-	dbConn := database.Conn
+	dbConn := config.Conn
 
 	inserted := 0
 	failed := 0
