@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/viper"
 	"log"
 	"os"
+	"sync"
 	"time"
 )
 
@@ -39,10 +40,23 @@ type APIConfig struct {
 	BaseURL string
 }
 
-var AppConfig *Config
+var (
+	appConfig *Config
+	configMu  sync.RWMutex
+)
+
+func init() {
+	loadConfig()
+}
 
 // GetConfig loads config from YAML based on APP_ENV
 func GetConfig() *Config {
+	configMu.RLock()
+	defer configMu.RUnlock()
+	return appConfig
+}
+
+func loadConfig() {
 	env := os.Getenv("APP_ENV")
 	if env == "" {
 		env = "development"
@@ -66,9 +80,9 @@ func GetConfig() *Config {
 
 	cfg.TokenExpiration = time.Duration(cfg.JWT.ExpirationHours) * time.Hour
 
-	AppConfig = &cfg
-	log.Printf("Configuration loaded for environment: %s", env)
-	return AppConfig
+	configMu.Lock()
+	appConfig = &cfg
+	configMu.Unlock()
 }
 
 func getConfigFile(env string) string {
