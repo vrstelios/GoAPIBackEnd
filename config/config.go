@@ -32,8 +32,8 @@ type DatabaseConfig struct {
 }
 
 type JWTConfig struct {
-	JWTSecret       string
-	ExpirationHours int
+	Secret          string `mapstructure:"secret"`
+	ExpirationHours int    `mapstructure:"expirationHours"`
 }
 
 type APIConfig struct {

@@ -13,6 +13,26 @@ type APIError struct {
 	Error        error  `json:"-"`
 }
 
+var (
+	ErrUnauthorized = &APIError{
+		Status:       http.StatusUnauthorized,
+		ErrorCode:    "UNAUTHORIZED",
+		ErrorMessage: "authorization token required",
+	}
+
+	ErrInvalidToken = &APIError{
+		Status:       http.StatusUnauthorized,
+		ErrorCode:    "INVALID_TOKEN",
+		ErrorMessage: "invalid or expired token",
+	}
+
+	ErrForbidden = &APIError{
+		Status:       http.StatusForbidden,
+		ErrorCode:    "FORBIDDEN",
+		ErrorMessage: "you are not allowed to access this resource",
+	}
+)
+
 func (APIError) NewError(err error) *APIError {
 	return APIError{}.New(0, "", err)
 }

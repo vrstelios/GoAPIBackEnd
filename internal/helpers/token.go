@@ -5,9 +5,42 @@ import (
 	"GoAPIBackEnd/internal/database"
 	"errors"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 	"time"
 )
+
+const (
+	CtxUserId = "userId"
+	CtxEmail  = "email"
+	CtxRole   = "role"
+)
+
+/*func GetUserId(c *gin.Context) string {
+	v, _ := c.Get(CtxUserId)
+	if s, ok := v.(string); ok {
+		return s
+	}
+	return ""
+}
+
+func GetUserEmail(c *gin.Context) string {
+	v, _ := c.Get(CtxEmail)
+	if s, ok := v.(string); ok {
+		return s
+	}
+	return ""
+}*/
+
+func GetUserRole(c *gin.Context) string {
+	v, _ := c.Get(CtxRole)
+	if s, ok := v.(string); ok {
+		return s
+	}
+	return ""
+}
+
+var jwtKey []byte
 
 type Claims struct {
 	UserId string `json:"userId"`
@@ -16,8 +49,6 @@ type Claims struct {
 
 	jwt.StandardClaims
 }
-
-var jwtKey []byte
 
 func SetJWTKey(key string) {
 	jwtKey = []byte(key)
@@ -29,10 +60,8 @@ func GetJWTKey() []byte {
 }
 
 func ValidateToken(tokenString string) (*Claims, error) {
-	secretKey := GetJWTKey()
-
 	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-		return secretKey, nil
+		return jwtKey, nil
 	})
 	if err != nil {
 		return nil, err

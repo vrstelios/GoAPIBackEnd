@@ -37,7 +37,8 @@ func SetupRoutes(router *gin.Engine) {
 	routerEndpoints.POST("/workoutLogs", api.PostWorkoutLogs)
 	routerEndpoints.GET("/workouts", api.QueryWorkouts)
 
-	routerEndpoints.Use(middleware.Authenticate())
+	tokenProvider := middleware.NewJWTTokenProvider()
+	routerEndpoints.Use(middleware.Authenticate(tokenProvider))
 	{
 		// Exercises endpoints
 		routerEndpoints.GET("/exercises", api.QueryExercises)

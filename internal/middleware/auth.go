@@ -1,14 +1,13 @@
 package middleware
 
 import (
+	"GoAPIBackEnd/internal/apperrors"
 	"GoAPIBackEnd/internal/helpers"
 	"github.com/gin-gonic/gin"
-	"log"
-	"net/http"
 	"strings"
 )
 
-func Authenticate() gin.HandlerFunc {
+func Authenticate(provider TokenProvider) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var token string
 		authHeader := c.GetHeader("Authorization")
@@ -27,50 +26,45 @@ func Authenticate() gin.HandlerFunc {
 		}
 
 		if token == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "authorization token required", "code": "UNAUTHORIZED"})
+			apperrors.GetAPIError(c, nil, 0, apperrors.ErrUnauthorized)
 			c.Abort()
 			return
 		}
 
-		claims, err := helpers.ValidateToken(token)
+		claims, err := provider.Validate(token)
 		if err != nil {
-			log.Printf("Token validation error: %v", err)
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid or expired token", "code": "INVALID_TOKEN"})
+			apperrors.GetAPIError(c, nil, 0, apperrors.ErrInvalidToken)
 			c.Abort()
 			return
 		}
 
-		c.Set("claims", claims)
+		c.Set(helpers.CtxUserId, claims.UserId)
+		c.Set(helpers.CtxEmail, claims.Email)
+		c.Set(helpers.CtxRole, claims.Role)
+
 		c.Next()
 	}
 }
 
 func RoleMiddleware(allowedRoles ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		claimsInterface, exists := c.Get("claims")
-		if !exists {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "authentication required", "code": "UNAUTHORIZED"})
-			c.Abort()
-			return
-		}
-
-		claims, ok := claimsInterface.(*helpers.Claims)
-		if !ok {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid authentication data", "code": "INVALID_CLAIMS"})
+		role := helpers.GetUserRole(c)
+		if role == "" {
+			apperrors.GetAPIError(c, nil, 0, apperrors.ErrUnauthorized)
 			c.Abort()
 			return
 		}
 
 		userHasAccess := false
 		for _, allowedRole := range allowedRoles {
-			if strings.EqualFold(claims.Role, allowedRole) {
+			if strings.EqualFold(role, allowedRole) {
 				userHasAccess = true
 				break
 			}
 		}
 
 		if !userHasAccess {
-			c.JSON(http.StatusForbidden, gin.H{"error": "FORBIDDEN", "user_role": claims.Role, "required_roles": allowedRoles})
+			apperrors.GetAPIError(c, nil, 0, apperrors.ErrForbidden)
 			c.Abort()
 			return
 		}
