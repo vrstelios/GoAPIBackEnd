@@ -14,5 +14,4 @@ database:
   sslmode: disable
 
 jwt:
-  expirationHours: 2
   secret: ${JWT_SECRET}

@@ -32,8 +32,7 @@ type DatabaseConfig struct {
 }
 
 type JWTConfig struct {
-	Secret          string `mapstructure:"secret"`
-	ExpirationHours int    `mapstructure:"expirationHours"`
+	Secret string `mapstructure:"secret"`
 }
 
 type APIConfig struct {
@@ -78,7 +77,7 @@ func loadConfig() {
 		log.Fatalf("Unable to parse config file: %v", err)
 	}
 
-	cfg.TokenExpiration = time.Duration(cfg.JWT.ExpirationHours) * time.Hour
+	cfg.TokenExpiration = time.Duration(time.Now().Add(7 * 24 * time.Hour).Unix())
 
 	configMu.Lock()
 	appConfig = &cfg

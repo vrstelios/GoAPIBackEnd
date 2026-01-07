@@ -1,7 +1,6 @@
 package api
 
 import (
-	"GoAPIBackEnd/config"
 	"GoAPIBackEnd/internal/apperrors"
 	config2 "GoAPIBackEnd/internal/config"
 	"GoAPIBackEnd/internal/database"
@@ -15,6 +14,7 @@ import (
 	"gorm.io/gorm"
 	"net/http"
 	"strings"
+	"time"
 )
 
 var validate = validator.New()
@@ -134,11 +134,10 @@ func Login(ctx *gin.Context) {
 
 	token, refreshToken := helpers.GenerateToken(user[0].Email, user[0].Id, user[0].Role)
 	helpers.UpdatedAllToken(token, refreshToken, user[0].Id)
-	expHours := config.GetConfig().JWT.ExpirationHours
 
 	// Send it back
 	ctx.SetSameSite(http.SameSiteLaxMode)
-	ctx.SetCookie("Authorization", token, expHours*3600, "/", "", false, true)
+	ctx.SetCookie("Authorization", token, int(time.Now().Add(7*24*time.Hour).Unix()), "/", "", false, true)
 
 	apperrors.GetAPIError(ctx, gin.H{}, http.StatusOK, nil)
 }
