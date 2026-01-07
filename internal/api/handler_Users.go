@@ -2,7 +2,6 @@ package api
 
 import (
 	"GoAPIBackEnd/internal/apperrors"
-	config2 "GoAPIBackEnd/internal/config"
 	"GoAPIBackEnd/internal/database"
 	"GoAPIBackEnd/internal/helpers"
 	"GoAPIBackEnd/internal/type/models"
@@ -31,7 +30,7 @@ var validate = validator.New()
 // @Failure 500 {object} models.APIError
 // @Router /auth/signup [post]
 func Signup(ctx *gin.Context) {
-	var dbConn = config2.Conn
+	var dbConn = database.Conn
 
 	userBody := models.Users{}
 	// Get user input
@@ -108,7 +107,7 @@ func Signup(ctx *gin.Context) {
 // @Failure 500 {object} models.APIError
 // @Router /auth/login [post]
 func Login(ctx *gin.Context) {
-	var dbConn = config2.Conn
+	var dbConn = database.Conn
 
 	userPayload := models.Users{}
 	if err := ctx.ShouldBindJSON(&userPayload); err != nil {

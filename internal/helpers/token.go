@@ -1,7 +1,6 @@
 package helpers
 
 import (
-	config2 "GoAPIBackEnd/internal/config"
 	"GoAPIBackEnd/internal/database"
 	"errors"
 	"github.com/dgrijalva/jwt-go"
@@ -124,7 +123,7 @@ func GenerateToken(email, userId, userType string) (string, string) {
 }
 
 func UpdatedAllToken(signedToken, signedRefreshToken, userId string) error {
-	var dbConn = config2.Conn
+	var dbConn = database.Conn
 
 	user, err := database.GetUser(dbConn, userId, "", "")
 	if err != nil {

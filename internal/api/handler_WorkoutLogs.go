@@ -2,7 +2,6 @@ package api
 
 import (
 	"GoAPIBackEnd/internal/apperrors"
-	"GoAPIBackEnd/internal/config"
 	"GoAPIBackEnd/internal/database"
 	"GoAPIBackEnd/internal/type/models"
 	"fmt"
@@ -21,7 +20,7 @@ import (
 // @Failure 500 {object} models.APIError
 // @Router /workoutLogs [post]
 func PostWorkoutLogs(ctx *gin.Context) {
-	var dbConn = config.Conn
+	var dbConn = database.Conn
 	var wls []models.WorkoutLog
 	err := ctx.ShouldBindJSON(&wls)
 	if err != nil {

@@ -2,7 +2,6 @@ package api
 
 import (
 	"GoAPIBackEnd/internal/apperrors"
-	"GoAPIBackEnd/internal/config"
 	"GoAPIBackEnd/internal/database"
 	"GoAPIBackEnd/internal/type/models"
 	"fmt"
@@ -21,7 +20,7 @@ import (
 // @Failure 500 {object} models.APIError
 // @Router /exercises [post]
 func PostExercise(ctx *gin.Context) {
-	var dbConn = config.Conn
+	var dbConn = database.Conn
 	ex := models.Exercises{}
 	err := ctx.ShouldBindJSON(&ex)
 	if err != nil {
@@ -66,7 +65,7 @@ func PostExercise(ctx *gin.Context) {
 // @Failure 500 {object} models.APIError
 // @Router /exercises/{id} [get]
 func GetExercise(ctx *gin.Context) {
-	var dbConn = config.Conn
+	var dbConn = database.Conn
 	id := ctx.Param("id")
 
 	exercise, err := database.GetExercise(dbConn, id, "")
@@ -90,7 +89,7 @@ func GetExercise(ctx *gin.Context) {
 // @Failure	500		{object}	models.APIError
 // @Router		/exercises [get]
 func QueryExercises(ctx *gin.Context) {
-	var dbConn = config.Conn
+	var dbConn = database.Conn
 
 	exercise, err := database.GetExercise(dbConn, "", "")
 	if err != nil {

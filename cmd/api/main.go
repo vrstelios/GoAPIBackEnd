@@ -4,7 +4,7 @@ import (
 	"GoAPIBackEnd/config"
 	"GoAPIBackEnd/internal"
 	"GoAPIBackEnd/internal/api"
-	config2 "GoAPIBackEnd/internal/config"
+	config2 "GoAPIBackEnd/internal/database"
 	"fmt"
 )
 

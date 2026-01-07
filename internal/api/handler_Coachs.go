@@ -2,7 +2,6 @@ package api
 
 import (
 	"GoAPIBackEnd/internal/apperrors"
-	"GoAPIBackEnd/internal/config"
 	"GoAPIBackEnd/internal/database"
 	"GoAPIBackEnd/internal/type/models"
 	"fmt"
@@ -21,7 +20,7 @@ import (
 // @Failure 500 {object} models.APIError
 // @Router /coach [post]
 func PostCoach(ctx *gin.Context) {
-	var dbConn = config.Conn
+	var dbConn = database.Conn
 	co := models.Coach{}
 	err := ctx.ShouldBindJSON(&co)
 	if err != nil {
@@ -66,7 +65,7 @@ func PostCoach(ctx *gin.Context) {
 // @Failure 500 {object} models.APIError
 // @Router /Coach/{name} [get]
 func GetCoach(ctx *gin.Context) {
-	var dbConn = config.Conn
+	var dbConn = database.Conn
 	name := ctx.Param("name")
 
 	coach, err := database.GetCoach(dbConn, name, true)
