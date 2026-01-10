@@ -1,30 +1,60 @@
 # GoAPIBackEnd
 
-A RESTful API service built with Go and Gin framework, featuring JWT authentication, GraphQL support, and Swagger documentation.
+A production-ready RESTful API built with Go and the Gin Framework, featuring secure JWT authentication, role-based access control, GraphQL integration, CSV data loading, and full Swagger documentation.
 
 > Project Inspiration: This project is based on the Fitness [Workout Tracker](https://roadmap.sh/projects/fitness-workout-tracker) project idea from roadmap.sh
 
-![DiagramDataBase.png](DiagramDataBase.png)
+---
 
-## Project Structure
+## Features
+
+### Core Functionality
+- **User Authentication** – Secure JWT-based login & signup
+- **Role-Based Access Control** – Admin & User permissions
+- **Workout Management** – Full CRUD operations
+- **Coach Management** – Admin-only access
+- **Exercise Management** – RESTful endpoints
+- **CSV Import Support** – Load workouts from CSV files with go-routing
+- **Filtering & Pagination** – Server-side query handling
+- **API Route Testing**
+
+### Technical Features
+- **Gin Framework** – Fast and lightweight
+- **JWT Authentication Middleware**
+- **Database Integration**
+- **GraphQL Endpoint + GraphiQL UI**
+- **Swagger / OpenAPI Documentation**
+- **Modular Internal Package Structure**
+- **Makefile Support for Common Tasks**
+
+---
+
+## Architecture
+
+This project follows a clean and structured architecture for maintainability and scalability.
 
 ```
 .
 ├── cmd/
 │   └── api/
-│       └── main.go              # Application entry point
+│       └── main.go               # Application entry point
 ├── congig/
-│   └── config.go                # Load envaronment variables
+│   ├──  config.go                # Load envaronment variables
+│   ├──  config-development.yml   # Include all variables for dev
+│   └──  config-production.yml    # Include all variables for pro
+├── csv/                          # Include all csv files
+│   ├──  workouts_set_1.csv  
+│   ├──  workouts_set_2.csv 
+│   └──  workouts_set_2.csv              
 ├── database/
-│   ├── schema.sql               # Schema from database
-│   └── schema-changes.sql       # Change the database
-├── docs/                        # Swagger documentation
+│   ├── schema.sql                # Schema from database
+│   └── schema-changes.sql        # Change the database
+├── docs/                         # Swagger documentation
 │   ├── docs.go                
 │   ├── swagger.json   
-│   └── swagger.yaml   
-├── excel/                       # Include all csv files      
+│   └── swagger.yaml       
 ├── internal/
-│   ├── api/                     # HTTP handlers
+│   ├── api/                      # HTTP handlers
 │   │   ├──  api.go
 │   │   ├──  client.go
 │   │   ├──  handler_Coach.go
@@ -34,49 +64,69 @@ A RESTful API service built with Go and Gin framework, featuring JWT authenticat
 │   │   ├──  handler_WokroutLogs.go 
 │   │   └──  handler_Wokrouts.go    
 │   ├── apperrors/
-│   │   ├──  apperror.go         # Error handlering
-│   ├── auth/
-│   │   └──  middleware.go       # JWT and role-based middleware
+│   │   ├──  apperror.go          # Error handlering
 │   ├── database/
-│   │   ├── database.go          # Connection with database
-│   │   └── crud.go              # Database queries
+│   │   ├──  database.go          # Connection with database
+│   │   └──  crud.go              # Database queries
 │   ├── graphql/
-│   │   └── schema.go            # GraphQL schema definitions
+│   │   └──  schema.go            # GraphQL schema definitions
+│   ├── helpers/
+│   │   └──  token.go             # Include tools for password/token
 │   ├── http/
-│   │   ├── httpserver.go        # Route definitions
-│   │   └── httpserver_test.go   # Route tests
-│   ├── type/                    # Data models
+│   │   ├──  httpserver.go        # Route definitions
+│   │   └──  httpserver_test.go   # Route tests
+│   ├── middleware/
+│   │   ├──  auth.go              # JWT and role-based middleware
+│   │   └──  token_provider.go    # Token provider            
+│   ├── type/                     # Data models
 │   │   ├── misc/    
-│   │   │    └── params.go         
+│   │   │    └──  params.go         
 │   │   └── modeles/
-│   │   │    ├── exercises.go
-│   │   │    ├── users.go
-│   │   │    └── workouts.go             
-│   └── server.go                # Server initialization
-├── .env                         # Include all variables
-├── air.toml                     # Air live reload configuration
-├── Makefile                     # Build and run commands
+│   │   │    ├──  exercises.go
+│   │   │    ├──  users.go
+│   │   │    └──  workouts.go             
+│   └──  server.go                # Server initialization
+├──  Makefile                     # Build and run commands
 ├── go.mod                       # Go module file
 └── README.md                    # This file
 ```
 
-## Features
+---
 
-- JWT-based authentication
-- Role-based access control (admin/user)
-- Connect with database
-- Task management CRUD operations
-- RESTful API with Gin framework
-- GraphQL endpoint with GraphiQL interface
-- Server-side filtering and pagination
-- Test Routes API
-- Load csv files functionality(with go routing)
-- Swagger/OpenAPI documentation
+## Database Schema
+The project includes:
+- Users
+- Exercises
+- Coaches
+- Workouts
+- Workout Logs
 
-## Prerequisites
+*(Schema files included in `/database` folder with schema & schema changes SQL.)*
 
-- Go 1.24 or higher
-- Make (optional, for using Makefile commands)
+![DiagramDataBase.png](DiagramDataBase.png)
+
+---
+
+## Technology Stack
+- **Language:** Go (1.24+)
+- **Framework:** Gin Web Framework
+- **Authentication:** JWT Tokens
+- **GraphQL:** GraphQL endpoint with GraphiQL UI
+- **Documentation:** Swagger / OpenAPI
+- **Database:** PostgreQL-based relational DB
+- **Testing:** Built-in route testing
+- **Configuration:** YAML-based config per environment
+
+---
+
+## Getting Started
+
+### Prerequisites
+- Go **1.24+**
+- PostgreSQL **12+**
+- Make (optional but recommended)
+
+---
 
 ## Installation
 
@@ -91,24 +141,40 @@ cd GoAPIBackEnd
 go mod download
 ```
 
-## Usage
-
-### Run the application
-
+3. Set up environment variables Create a .yml file in the src directory:
 ```bash
-# Using Make
-make run
+server:
+  host: localhost
+  port: ":8080"
 
-# Or directly
-go run cmd/api/main.go
+api:
+  baseURL: "http://localhost:8080/api/"
 
-### Generate Swagger documentation
+database:
+  host: localhost
+  port: 5432
+  user: your_username
+  password: your_password
+  name: workout_tracker
+  sslmode: disable
 
-```bash
-make swagger
+jwt:
+  secret: your_jwt_secret
 ```
 
-Then access Swagger UI at: `http://localhost:8080/swagger/index.html`
+4. Set the environment variable to load development configuration:
+
+5. Start the server
+```bash
+go run cmd/api/main.go
+```
+
+### Swagger Documentation
+
+The API is fully documented using Swagger/OpenAPI 3.0. Once the server is running, you can access:
+- Swagger UI: `http://localhost:8080/swagger/index.html`
+- OpenAPI JSON: http://localhost:8080/swagger/doc.json
+- OpenAPI YAML: Available in src/docs/swagger.yaml
 
 ## API Endpoints
 
@@ -131,7 +197,7 @@ Then access Swagger UI at: `http://localhost:8080/swagger/index.html`
 - `POST /api/load/workouts` - load data from csv files foe workouts
 
 ### GraphQL
-- `POST /api/graphql/workouts/logs` - GraphQL endpoint (with GraphiQL interface)
+- `POST /api/graphql/workouts/logs` - GraphQL endpoint (with GraphQL interface)
 
 ## Testing
 - `POST /api/auth/signup` - Signup a new user
@@ -146,3 +212,23 @@ make test
 # Run tests with coverage
 make TestRoutes
 ```
+
+### Security
+- JWT Authentication
+- Role-Based Access Control
+- Protected Routes
+- Secure Token Handling
+- Centralized Error Handling
+
+### Contributing
+- Fork the repo
+- Create a feature branch (git checkout -b feature/amazing-feature)
+- Commit your changes (git commit -m 'Add some amazing feature')
+- Push to the branch (git push origin feature/amazing-feature)
+- Open a Pull Request
+
+### Author
+[DoctorVerRossi](https://github.com/vrstelios)
+---
+
+If you find this project helpful, please give it a star on GitHub!
