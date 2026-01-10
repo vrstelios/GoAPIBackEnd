@@ -174,7 +174,7 @@ go run cmd/api/main.go
 The API is fully documented using Swagger/OpenAPI 3.0. Once the server is running, you can access:
 - Swagger UI: `http://localhost:8080/swagger/index.html`
 - OpenAPI JSON: http://localhost:8080/swagger/doc.json
-- OpenAPI YAML: Available in src/docs/swagger.yaml
+- OpenAPI YAML: Available in docs/swagger.yaml
 
 ## API Endpoints
 
@@ -229,6 +229,7 @@ make TestRoutes
 
 ### Author
 [DoctorVerRossi](https://github.com/vrstelios)
+
 ---
 
 If you find this project helpful, please give it a star on GitHub!
