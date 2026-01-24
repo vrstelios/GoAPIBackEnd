@@ -14,7 +14,7 @@ A production-ready RESTful API built with Go and the Gin Framework, featuring se
 - **Workout Management** – Full CRUD operations
 - **Coach Management** – Admin-only access
 - **Exercise Management** – RESTful endpoints
-- **CSV Import Support** – Load workouts from CSV files with go-routing
+- **CSV Import Support** – Load workouts from CSV files with goroutines
 - **Filtering & Pagination** – Server-side query handling
 - **API Route Testing**
 
@@ -194,7 +194,7 @@ The API is fully documented using Swagger/OpenAPI 3.0. Once the server is runnin
 - `PUT /api/workouts/:id` - Update Workout
 - `DELETE /api/workouts/:id` - Delete Workout
 - `POST /api/workouts/query` - Query Workouts (server side filtering & paging)
-- `POST /api/load/workouts` - load data from csv files foe workouts
+- `POST /api/load/workouts` - load data from csv files for workouts
 
 ### GraphQL
 - `POST /api/graphql/workouts/logs` - GraphQL endpoint (with GraphQL interface)
