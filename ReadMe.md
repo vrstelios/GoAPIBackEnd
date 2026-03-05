@@ -94,12 +94,6 @@ This project follows a clean and structured architecture for maintainability and
 ---
 
 ## Database Schema
-The project includes:
-- Users
-- Exercises
-- Coaches
-- Workouts
-- Workout Logs
 
 *(Schema files included in `/database` folder with schema & schema changes SQL.)*
 
@@ -124,7 +118,6 @@ The project includes:
 ### Prerequisites
 - Go **1.24+**
 - PostgreSQL **12+**
-- Make (optional but recommended)
 
 ---
 
