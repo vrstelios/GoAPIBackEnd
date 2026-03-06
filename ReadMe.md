@@ -103,7 +103,7 @@ The project includes:
 
 *(Schema files included in `/database` folder with schema & schema changes SQL.)*
 
-![DiagramDataBase.png](DiagramDataBase.png)
+![DiagramDataBase.png](DiagramDataBase.jpg)
 
 ---
 
